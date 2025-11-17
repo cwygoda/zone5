@@ -20,6 +20,13 @@
 		"test:e2e": "playwright test",
 		"test:ui": "echo 'No UI integration tests yet' && exit 0",
 		"test": "vitest --exclude '**/cli/**'",
+		"dagger:test": "dagger -m ./dagger call test --source=.",
+		"dagger:test:cli": "dagger -m ./dagger call test-cli --source=.",
+		"dagger:test:e2e": "dagger -m ./dagger call test-e2e --source=.",
+		"dagger:test:all": "dagger -m ./dagger call test-all --source=.",
+		"dagger:check": "dagger -m ./dagger call check --source=.",
+		"dagger:lint": "dagger -m ./dagger call lint --source=.",
+		"dagger:ci": "dagger -m ./dagger call ci --source=.",
 		"prepare": "husky"
 	},
 	"lint-staged": {
@@ -71,6 +78,7 @@
 	"devDependencies": {
 		"@commitlint/cli": "^20.1.0",
 		"@commitlint/config-conventional": "^20.0.0",
+		"@dagger.io/dagger": "^0.19.6",
 		"@lucide/svelte": "0.553.0",
 		"@playwright/test": "^1.56.1",
 		"@sveltejs/kit": "^2.48.4",

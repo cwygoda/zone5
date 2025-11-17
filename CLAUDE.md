@@ -63,6 +63,30 @@ pnpm test:all     # All tests (~74.6s) - Run before releases
 - To run a single test file: `pnpm vitest src/path/to/file.test.ts`
 - To run a single test in watch mode: `pnpm vitest src/path/to/file.test.ts --watch`
 
+### Dagger Pipelines (Isolated Testing)
+
+The project includes Dagger.io pipelines for fully isolated, containerized testing:
+
+```bash
+pnpm dagger:test       # Unit tests in isolated container
+pnpm dagger:test:cli   # CLI tests in isolated container
+pnpm dagger:test:e2e   # E2E tests in isolated container (with Playwright)
+pnpm dagger:test:all   # All tests in parallel, isolated containers
+pnpm dagger:lint       # Linting in isolated container
+pnpm dagger:check      # Type checking in isolated container
+pnpm dagger:ci         # Full CI pipeline (lint, check, test, build)
+```
+
+**Dagger Benefits:**
+
+- **Reproducibility**: Same container environment everywhere (local, CI, production)
+- **Isolation**: Each test suite runs in its own container with clean state
+- **Parallelization**: Run multiple test suites concurrently without conflicts
+- **Caching**: Intelligent caching of dependencies and artifacts via Docker volumes
+- **CI/CD Ready**: Same commands work in GitHub Actions, GitLab CI, or any CI system
+
+See `dagger/README.md` for detailed documentation on the Dagger pipelines.
+
 ## Architecture
 
 ### Image Processing Pipeline

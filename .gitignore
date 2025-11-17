@@ -1,6 +1,9 @@
+/.claude
 /.playwright-reports
 /.playwright-results
 /.svelte-kit
 /.zone5
+/dagger/node_modules
+/dagger/sdk
 /dist
 /node_modules

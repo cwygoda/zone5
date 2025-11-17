@@ -1,0 +1,6 @@
+{
+	"name": "zone5",
+	"sdk": "typescript",
+	"source": ".",
+	"engineVersion": "v0.19.6"
+}

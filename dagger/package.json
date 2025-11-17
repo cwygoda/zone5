@@ -1,0 +1,15 @@
+{
+	"name": "zone5-dagger",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "tsx --tsconfig ./tsconfig.json --no-warnings --conditions dagger $(npm root)/@dagger.io/dagger/dist/entrypoint/build.js"
+	},
+	"dependencies": {
+		"@dagger.io/dagger": "^0.19.6"
+	},
+	"devDependencies": {
+		"tsx": "^4.19.2"
+	}
+}
