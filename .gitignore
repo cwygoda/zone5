@@ -1,0 +1,6 @@
+/.playwright-reports
+/.playwright-results
+/.svelte-kit
+/.zone5
+/dist
+/node_modules
