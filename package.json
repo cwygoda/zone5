@@ -69,7 +69,8 @@
 	"files": [
 		"dist",
 		"!dist/**/*.test.*",
-		"!dist/**/*.spec.*"
+		"!dist/**/*.spec.*",
+		"!dist/**/test-data/**"
 	],
 	"peerDependencies": {
 		"@lucide/svelte": "^0.553.0",

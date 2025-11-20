@@ -1,0 +1,8 @@
+# Test files
+**/*.test.ts
+**/*.test.js
+**/*.spec.ts
+**/*.spec.js
+
+# Test data
+**/test-data/**
