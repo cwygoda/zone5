@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import type { Action } from 'svelte/action';
 
 	import type { ImageData } from './types';
@@ -26,33 +25,35 @@
 		return breakpoints.join(', ');
 	});
 
-	let img: HTMLImageElement;
-	let loaded = $state(true);
+	let loaded = $state(false);
 
-	$effect(() => {
-		// Track `sizes` to rerun on change of `image` prop
-		void sizes;
-		// Track `img` element, in case effect runs before img is set
-		const imgEl = img;
+	// Action to handle image load state - runs when element is mounted
+	const useImageLoad: Action<HTMLImageElement> = (node) => {
+		const handleLoad = () => {
+			loaded = true;
+		};
 
-		if (!imgEl) return;
-		if (imgEl.complete) {
-			untrack(() => {
-				loaded = true;
-			});
+		// Check if already loaded (e.g., from cache)
+		if (node.complete && node.naturalWidth > 0) {
+			loaded = true;
 			return;
 		}
 
-		untrack(() => {
-			loaded = false;
-		});
-		const handleLoad = () => (loaded = true);
-		imgEl.addEventListener('load', handleLoad);
+		// Not loaded yet - add listener first, then recheck to avoid race condition
+		loaded = false;
+		node.addEventListener('load', handleLoad);
+
+		// Recheck complete after adding listener in case image loaded during setup
+		if (node.complete && node.naturalWidth > 0) {
+			loaded = true;
+			node.removeEventListener('load', handleLoad);
+			return;
+		}
 
 		return () => {
-			imgEl.removeEventListener('load', handleLoad);
+			node.removeEventListener('load', handleLoad);
 		};
-	});
+	};
 
 	const useOnclick: Action<HTMLDivElement, (() => void) | undefined> = (node, handler) => {
 		const setHandler = (handler?: () => void | undefined) => {
@@ -109,7 +110,7 @@
 					'opacity-100': loaded,
 				},
 			]}
-			bind:this={img}
+			use:useImageLoad
 		/>
 	</picture>
 </div>
