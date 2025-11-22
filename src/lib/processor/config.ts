@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import sharp from 'sharp';
 import z from 'zod';
 
@@ -9,7 +10,11 @@ export const ProcessorConfigSchema = z
 	})
 	.prefault({});
 
-export type ProcessorConfig = z.infer<typeof ProcessorConfigSchema> & {
-	clear?: boolean;
-	forceOverwrite?: boolean;
+export type ProcessorConfig = z.infer<typeof ProcessorConfigSchema>;
+
+export const configHash = (config: ProcessorConfig) => {
+	// Generate SHAKE256 hash with length 4 for config
+	const hash = createHash('shake256', { outputLength: 4 });
+	hash.update(JSON.stringify(config));
+	return hash.digest('hex');
 };

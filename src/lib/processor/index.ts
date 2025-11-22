@@ -6,7 +6,7 @@ import sharp from 'sharp';
 import type { BaseConfigType } from '../config.js';
 import { generateBlurhash } from './blurhash.js';
 import { type DominantColor, getDominantColors } from './color.js';
-import type { ProcessorConfig } from './config.js';
+import { configHash, type ProcessorConfig } from './config.js';
 import type { ExifItem } from './exif/exif.js';
 import exifFromFilePath from './exif/index.js';
 import type { GeojsonPoint } from './exif/types.js';
@@ -36,16 +36,21 @@ const processor = async (options: {
 }) => {
 	return tracer.startActiveSpan('zone5.processor', async (span) => {
 		try {
-			const { base, sourceFile, clear = false, forceOverwrite = false } = options;
+			const { base, processor: processorConfig, sourceFile, clear = false, forceOverwrite = false } = options;
 
 			const { name: fileBasename } = parse(sourceFile);
 			const sourceHash = sourceFileHash(base.root, sourceFile);
-			const featureFile = join(base.cache, `${fileBasename}-${sourceHash}`, 'index.json');
+			const procConfigHash = configHash(processorConfig);
+
+			const cacheDir = join(base.cache, `${procConfigHash}-${fileBasename}-${sourceHash}`);
+			const featureFile = join(cacheDir, 'index.json');
 
 			span.setAttributes({
 				'zone5.sourceFile': sourceFile,
 				'zone5.fileBasename': fileBasename,
 				'zone5.sourceHash': sourceHash,
+				'zone5.configHash': procConfigHash,
+				'zone5.cacheDir': cacheDir,
 				'zone5.clear': clear,
 				'zone5.forceOverwrite': forceOverwrite,
 			});
@@ -55,7 +60,7 @@ const processor = async (options: {
 					exifFromFilePath(sourceFile),
 					generateBlurhash(sourceFile),
 					getDominantColors(sourceFile),
-					generateImageVariants(options),
+					generateImageVariants({ sourceFile, processor: processorConfig, cacheDir, clear, forceOverwrite }),
 					sharp(sourceFile).metadata(),
 				]);
 
