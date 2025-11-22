@@ -4,7 +4,21 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { configHash, type ProcessorConfig } from './config';
+import { sourceFileHash } from './file';
 import { generateImageVariants } from './variants';
+
+const createCacheDir = (
+	cache: string,
+	root: string,
+	sourceFile: string,
+	processor: ProcessorConfig,
+) => {
+	const fileBasename = sourceFile.split('/').pop()!.replace(/\.[^.]+$/, '');
+	const sourceHash = sourceFileHash(root, sourceFile);
+	const procConfigHash = configHash(processor);
+	return join(cache, `${procConfigHash}-${fileBasename}-${sourceHash}`);
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,14 +48,16 @@ describe('generateImageVariants', () => {
 	});
 
 	it('should generate variants with correct naming and structure', async () => {
+		const processor = {
+			resize_kernel: 'linear',
+			resize_gamma: 2.2,
+			variants: [100, 200, 400],
+		};
+		const cacheDir = createCacheDir(cache, root, testImagePath, processor);
 		const options = {
-			base: { root, cache, namespace: '@zone5' },
-			processor: {
-				resize_kernel: 'linear',
-				resize_gamma: 2.2,
-				variants: [100, 200, 400],
-			},
+			processor,
 			sourceFile: testImagePath,
+			cacheDir,
 		};
 
 		const variants = await generateImageVariants(options);
@@ -54,19 +70,21 @@ describe('generateImageVariants', () => {
 		// Check that all files exist
 		for (const variant of variants) {
 			await expect(access(variant.path)).resolves.not.toThrow();
-			expect(variant.path).toMatch(/canon-m6-22mm-[a-f0-9]{16}\/canon-m6-22mm-\d+\.jpg$/);
+			expect(variant.path).toMatch(/[a-f0-9]{8}-canon-m6-22mm-[a-f0-9]{16}\/canon-m6-22mm-\d+\.jpg$/);
 		}
 	});
 
 	it('should create cache subdirectory with hash', async () => {
+		const processor = {
+			resize_kernel: 'linear',
+			resize_gamma: 2.2,
+			variants: [200],
+		};
+		const cacheDir = createCacheDir(cache, root, testImagePath, processor);
 		const options = {
-			base: { root, cache, namespace: '@zone5' },
-			processor: {
-				resize_kernel: 'linear',
-				resize_gamma: 2.2,
-				variants: [200],
-			},
+			processor,
 			sourceFile: testImagePath,
+			cacheDir,
 		};
 
 		await generateImageVariants(options);
@@ -74,18 +92,20 @@ describe('generateImageVariants', () => {
 		// Check that subdirectory was created with expected pattern
 		const entries = await import('fs').then((fs) => fs.promises.readdir(cache));
 		expect(entries).toHaveLength(1);
-		expect(entries[0]).toMatch(/^canon-m6-22mm-[a-f0-9]{16}$/);
+		expect(entries[0]).toMatch(/^[a-f0-9]{8}-canon-m6-22mm-[a-f0-9]{16}$/);
 	});
 
 	it('should not overwrite existing files by default', async () => {
+		const processor = {
+			resize_kernel: 'linear',
+			resize_gamma: 2.2,
+			variants: [200],
+		};
+		const cacheDir = createCacheDir(cache, root, testImagePath, processor);
 		const options = {
-			base: { root, cache, namespace: '@zone5' },
-			processor: {
-				resize_kernel: 'linear',
-				resize_gamma: 2.2,
-				variants: [200],
-			},
+			processor,
 			sourceFile: testImagePath,
+			cacheDir,
 		};
 
 		// Generate variants first time
@@ -103,14 +123,16 @@ describe('generateImageVariants', () => {
 	});
 
 	it('should overwrite existing files when forceOverwrite is true', async () => {
+		const processor = {
+			resize_kernel: 'linear',
+			resize_gamma: 2.2,
+			variants: [200],
+		};
+		const cacheDir = createCacheDir(cache, root, testImagePath, processor);
 		const options = {
-			base: { root, cache, namespace: '@zone5' },
-			processor: {
-				resize_kernel: 'linear',
-				resize_gamma: 2.2,
-				variants: [200],
-			},
+			processor,
 			sourceFile: testImagePath,
+			cacheDir,
 		};
 
 		// Generate variants first time
@@ -128,47 +150,53 @@ describe('generateImageVariants', () => {
 	});
 
 	it('should clear directory when clear option is true', async () => {
+		const processor = {
+			resize_kernel: 'linear',
+			resize_gamma: 2.2,
+			variants: [200, 400],
+		};
+		const cacheDir = createCacheDir(cache, root, testImagePath, processor);
 		const options = {
-			base: { root, cache, namespace: '@zone5' },
-			processor: {
-				resize_kernel: 'linear',
-				resize_gamma: 2.2,
-				variants: [200, 400],
-			},
+			processor,
 			sourceFile: testImagePath,
+			cacheDir,
 		};
 
 		// Generate variants first time
 		await generateImageVariants(options);
 
 		// Verify files exist
-		const entries = await import('fs').then((fs) => fs.promises.readdir(cache));
-		const subDir = join(cache, entries[0]);
-		const files = await import('fs').then((fs) => fs.promises.readdir(subDir));
+		const files = await import('fs').then((fs) => fs.promises.readdir(cacheDir));
 		expect(files).toHaveLength(2);
 
 		// Generate with clear option and fewer widths
+		const newProcessor = { ...processor, variants: [300] };
+		const newCacheDir = createCacheDir(cache, root, testImagePath, newProcessor);
 		await generateImageVariants({
-			...options,
-			processor: { ...options.processor, variants: [300] },
+			processor: newProcessor,
+			sourceFile: testImagePath,
+			cacheDir: newCacheDir,
 			clear: true,
 		});
 
 		// Verify only new file exists
-		const newFiles = await import('fs').then((fs) => fs.promises.readdir(subDir));
+		const newFiles = await import('fs').then((fs) => fs.promises.readdir(newCacheDir));
 		expect(newFiles).toHaveLength(1);
 		expect(newFiles[0]).toMatch(/canon-m6-22mm-300\.jpg$/);
 	});
 
 	it('should handle invalid source file', async () => {
+		const processor = {
+			resize_kernel: 'linear',
+			resize_gamma: 2.2,
+			variants: [100, 200],
+		};
+		const sourceFile = '/invalid/path/to/image.jpg';
+		const cacheDir = createCacheDir(cache, root, sourceFile, processor);
 		const options = {
-			base: { root, cache, namespace: '@zone5' },
-			processor: {
-				resize_kernel: 'linear',
-				resize_gamma: 2.2,
-				variants: [100, 200],
-			},
-			sourceFile: '/invalid/path/to/image.jpg',
+			processor,
+			sourceFile,
+			cacheDir,
 		};
 
 		await expect(generateImageVariants(options)).rejects.toThrow();
@@ -177,14 +205,16 @@ describe('generateImageVariants', () => {
 	it.for(['lanczos3', 'linear', 'cubic'])(
 		'should use %s resize kernel without errors',
 		async (kernel) => {
+			const processor = {
+				resize_kernel: kernel,
+				resize_gamma: 2.2,
+				variants: [150],
+			};
+			const cacheDir = createCacheDir(cache, root, testImagePath, processor);
 			const options = {
-				base: { root, cache, namespace: '@zone5' },
-				processor: {
-					resize_kernel: kernel,
-					resize_gamma: 2.2,
-					variants: [150],
-				},
+				processor,
 				sourceFile: testImagePath,
+				cacheDir,
 				forceOverwrite: true,
 			};
 

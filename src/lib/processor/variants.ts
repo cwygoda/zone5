@@ -3,9 +3,8 @@ import { rm } from 'fs/promises';
 import { join, parse } from 'path';
 import sharp from 'sharp';
 
-import type { BaseConfigType } from '../config.js';
 import type { ProcessorConfig } from './config.js';
-import { ensureDirectoryExists, fileExists, sourceFileHash } from './file.js';
+import { ensureDirectoryExists, fileExists } from './file.js';
 
 const tracer = trace.getTracer('zone5-processor-variants');
 
@@ -22,15 +21,15 @@ const addDebugText = async (img: sharp.Sharp, width: number, height: number) => 
 };
 
 export async function generateImageVariants(options: {
-	base: BaseConfigType;
 	processor: ProcessorConfig;
 	sourceFile: string;
+	cacheDir: string;
 	clear?: boolean;
 	forceOverwrite?: boolean;
 }): Promise<GeneratedVariant[]> {
 	return tracer.startActiveSpan('zone5.generateImageVariants', async (span) => {
 		try {
-			const { base, processor, sourceFile, clear = false, forceOverwrite = false } = options;
+			const { processor, sourceFile, cacheDir, clear = false, forceOverwrite = false } = options;
 
 			// Parse file path components
 			const { name: fileBasename, ext: fileExtension } = parse(sourceFile);
@@ -46,24 +45,23 @@ export async function generateImageVariants(options: {
 				'zone5.sourceFile': sourceFile,
 				'zone5.sourceWidth': sourceWidth,
 				'zone5.validWidthsCount': validWidths.length,
+				'zone5.cacheDir': cacheDir,
 				'zone5.clear': clear,
 				'zone5.forceOverwrite': forceOverwrite,
 			});
 
-			// Create cache subdirectory
-			const sourceHash = sourceFileHash(base.root, sourceFile);
-			const cacheSubDir = join(base.cache, `${fileBasename}-${sourceHash}`);
+			// Prepare cache directory
 			if (clear) {
-				await rm(cacheSubDir, { recursive: true, force: true });
+				await rm(cacheDir, { recursive: true, force: true });
 			}
-			await ensureDirectoryExists(cacheSubDir);
+			await ensureDirectoryExists(cacheDir);
 
 			// Generate variants for each valid width
 			const variants: GeneratedVariant[] = [];
 			let generatedCount = 0;
 			for (const width of validWidths) {
 				const variantFilename = `${fileBasename}-${width}${fileExtension}`;
-				const variantPath = join(cacheSubDir, variantFilename);
+				const variantPath = join(cacheDir, variantFilename);
 
 				// Check if variant already exists and should be overwritten
 				const variantExists = await fileExists(variantPath);
