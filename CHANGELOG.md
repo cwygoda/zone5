@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/cwygoda/zone5/compare/v1.0.1...v1.1.0) (2025-11-22)
+
+
+### Features
+
+* use processor config hash in cache file paths ([e67cb31](https://github.com/cwygoda/zone5/commit/e67cb3180b3c62d2d420799184e20eda44e0c185))
+
 ## [1.0.1](https://github.com/cwygoda/zone5/compare/v1.0.0...v1.0.1) (2025-11-20)
 
 
