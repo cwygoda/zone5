@@ -66,7 +66,11 @@ export async function generateImageVariants(options: {
 				// Check if variant already exists and should be overwritten
 				const variantExists = await fileExists(variantPath);
 				if (!variantExists || forceOverwrite) {
-					let img = sharp(sourceFile).gamma(processor.resize_gamma).resize(width, null, {
+					let img = sharp(sourceFile);
+					if (processor.resize_gamma) {
+						img = img.gamma(processor.resize_gamma);
+					}
+					img = img.resize(width, null, {
 						fit: 'inside',
 						kernel: processor.resize_kernel,
 					});
