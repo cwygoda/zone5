@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/cwygoda/zone5/compare/v1.1.0...v1.2.0) (2025-11-23)
+
+
+### Bug Fixes
+
+* fix state reactivity issues ([5e3c1c5](https://github.com/cwygoda/zone5/commit/5e3c1c5de0cec7306b4b9a1b23f4a4afe71a1e9d))
+
+
+### Features
+
+* make resizing gamma correction optional ([1c6ead2](https://github.com/cwygoda/zone5/commit/1c6ead2f6fbc9404d031a955eb3564745d1b4fcc))
+
 # [1.1.0](https://github.com/cwygoda/zone5/compare/v1.0.1...v1.1.0) (2025-11-22)
 
 
