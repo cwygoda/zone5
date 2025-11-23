@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 
 	import Img from './Zone5Img.svelte';
 	import { useImageRegistry } from './Zone5Provider.svelte';
@@ -29,9 +29,15 @@
 
 	// Register images with the global image registry
 	$effect(() => {
-		if (imageStore) {
-			imageStore.register(componentId, images);
-		}
+		// Track images to re-run when they change
+		const imagesToRegister = images;
+
+		// Use untrack to prevent the store update from creating a circular dependency
+		untrack(() => {
+			if (imageStore) {
+				imageStore.register(componentId, imagesToRegister);
+			}
+		});
 	});
 
 	// Cleanup on component unmount

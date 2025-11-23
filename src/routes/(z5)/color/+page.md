@@ -14,3 +14,5 @@ zone5mode: waterfall
 ![sf](./images/sf.jpg?z5)
 ![split_rock](./images/split_rock.jpg?z5)
 ![stadium](./images/stadium.jpg?z5)
+
+[Home](/)
