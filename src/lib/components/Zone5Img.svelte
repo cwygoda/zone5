@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { Action } from 'svelte/action';
 
 	import type { ImageData } from './types';
@@ -26,13 +27,30 @@
 	});
 
 	let img: HTMLImageElement;
-	let loaded = $state(false);
+	let loaded = $state(true);
+
 	$effect(() => {
-		loaded = img.complete;
+		// Track `sizes` to rerun on change of `image` prop
+		void sizes;
+		// Track `img` element, in case effect runs before img is set
+		const imgEl = img;
+
+		if (!imgEl) return;
+		if (imgEl.complete) {
+			untrack(() => {
+				loaded = true;
+			});
+			return;
+		}
+
+		untrack(() => {
+			loaded = false;
+		});
 		const handleLoad = () => (loaded = true);
-		img.addEventListener('load', handleLoad);
+		imgEl.addEventListener('load', handleLoad);
+
 		return () => {
-			img.removeEventListener('load', handleLoad);
+			imgEl.removeEventListener('load', handleLoad);
 		};
 	});
 
