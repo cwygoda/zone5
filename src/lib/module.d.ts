@@ -1,4 +1,4 @@
-// Augment mdast types
+// Augment mdast types for remark plugin
 import type { SvelteComponent } from 'svast';
 
 declare module 'mdast' {
@@ -9,11 +9,4 @@ declare module 'mdast' {
 		};
 		svelteComponent: SvelteComponent;
 	}
-}
-
-declare module '*?z5' {
-	import type { ItemFeature } from './processor';
-
-	const data: ItemFeature;
-	export default data;
 }
