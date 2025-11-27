@@ -31,6 +31,7 @@
 		"dagger:test:all": "dagger -m ./dagger call test-all --source=.",
 		"dagger:check": "dagger -m ./dagger call check --source=.",
 		"dagger:lint": "dagger -m ./dagger call lint --source=.",
+		"dagger:build:site": "dagger -m ./dagger call build-site --source=.",
 		"dagger:ci": "dagger -m ./dagger call ci --source=.",
 		"prepare": "husky"
 	},

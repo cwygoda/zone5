@@ -171,6 +171,23 @@ export class Zone5 {
 	}
 
 	/**
+	 * Build the documentation site
+	 *
+	 * @param source Project source directory
+	 * @returns The built site as a directory
+	 */
+	@func()
+	async buildSite(source: Directory): Promise<Directory> {
+		const container = await this.setupProject(source);
+
+		// Build the package first (required for site), then build the site
+		return container
+			.withExec(['pnpm', 'build'])
+			.withExec(['pnpm', 'build:site'])
+			.directory('/workspace/build');
+	}
+
+	/**
 	 * Full CI pipeline: lint, check, test all, and build
 	 *
 	 * @param source Project source directory
