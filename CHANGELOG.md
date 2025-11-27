@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/cwygoda/zone5/compare/v1.2.0...v1.2.1) (2025-11-27)
+
+
+### Bug Fixes
+
+* fix opacity transition issues on mount ([54c1c8d](https://github.com/cwygoda/zone5/commit/54c1c8de843ce018c52cec341c35e907251e1951))
+
 # [1.2.0](https://github.com/cwygoda/zone5/compare/v1.1.0...v1.2.0) (2025-11-23)
 
 
