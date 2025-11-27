@@ -50,8 +50,10 @@
 			return;
 		}
 
-		return () => {
-			node.removeEventListener('load', handleLoad);
+		return {
+			destroy: () => {
+				node.removeEventListener('load', handleLoad);
+			}
 		};
 	};
 
