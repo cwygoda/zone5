@@ -184,7 +184,7 @@ export class Zone5 {
 		return container
 			.withExec(['pnpm', 'build'])
 			.withExec(['pnpm', 'build:site'])
-			.directory('/workspace/build');
+			.directory('/workspace/dist-site');
 	}
 
 	/**
