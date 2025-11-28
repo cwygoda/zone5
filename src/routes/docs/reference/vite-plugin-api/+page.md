@@ -13,14 +13,22 @@ import { zone5 } from 'zone5/vite';
 ## Function Signature
 
 ```typescript
-function zone5(cwd?: string): Plugin
+function zone5(options?: Zone5PluginOptions): Plugin
 ```
 
-### Parameters
+### Options
 
-| Parameter | Type     | Default     | Description                                                                          |
-| --------- | -------- | ----------- | ------------------------------------------------------------------------------------ |
-| `cwd`     | `string` | `undefined` | Working directory for loading `.zone5.toml`. If not specified, uses `process.cwd()`. |
+```typescript
+interface Zone5PluginOptions {
+  cwd?: string;
+  basePath?: string;
+}
+```
+
+| Option     | Type     | Default     | Description                                                                          |
+| ---------- | -------- | ----------- | ------------------------------------------------------------------------------------ |
+| `cwd`      | `string` | `undefined` | Working directory for loading `.zone5.toml`. If not specified, uses `process.cwd()`. |
+| `basePath` | `string` | `undefined` | URL prefix for assets. Prepended to SvelteKit's `paths.base`. Useful for deploying to subdirectories. |
 
 ### Return Value
 
@@ -41,6 +49,28 @@ export default defineConfig({
   ]
 });
 ```
+
+## Deploying to a Subdirectory
+
+When deploying to a subdirectory (e.g., GitHub Pages at `/<repo-name>/`), use the `basePath` option:
+
+```typescript
+// vite.config.ts
+export default defineConfig({
+  plugins: [
+    zone5({ basePath: process.env.BASE_PATH || '' }),
+    sveltekit()
+  ]
+});
+```
+
+The `basePath` is prepended to SvelteKit's `paths.base`. For example:
+
+| `basePath` | `paths.base` | Final asset URL prefix |
+| ---------- | ------------ | ---------------------- |
+| `/docs`    | `/`          | `/docs/@zone5/`        |
+| `/docs`    | `/app`       | `/docs/app/@zone5/`    |
+| (none)     | `/app`       | `/app/@zone5/`         |
 
 ## Plugin Order
 
