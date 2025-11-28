@@ -224,5 +224,5 @@ ItemFeature data is cached as JSON:
 
 ## Related
 
-- [GeoJSON Format Choice](../explanation/geojson-format-choice/) - Why GeoJSON
-- [Component Props Reference](./component-props/) - Component API
+- [GeoJSON Format Choice](../../explanation/geojson-format-choice/) - Why GeoJSON
+- [Component Props Reference](../component-props/) - Component API

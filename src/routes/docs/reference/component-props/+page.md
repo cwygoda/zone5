@@ -247,5 +247,5 @@ interface ImageData {
 
 ## Related
 
-- [ItemFeature Schema](./itemfeature-schema/) - Full schema documentation
-- [Keyboard Shortcuts](./keyboard-shortcuts/) - All keyboard controls
+- [ItemFeature Schema](../itemfeature-schema/) - Full schema documentation
+- [Keyboard Shortcuts](../keyboard-shortcuts/) - All keyboard controls

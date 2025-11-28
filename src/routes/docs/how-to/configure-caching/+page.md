@@ -231,5 +231,5 @@ variants = [640, 1280, 1920]
 
 ## Related
 
-- [Caching Strategy](../explanation/caching-strategy/) - How caching works
-- [Configuration Reference](../reference/configuration/) - All config options
+- [Caching Strategy](../../explanation/caching-strategy/) - How caching works
+- [Configuration Reference](../../reference/configuration/) - All config options

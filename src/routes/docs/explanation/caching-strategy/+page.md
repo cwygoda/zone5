@@ -223,6 +223,6 @@ For large galleries:
 
 ## Related
 
-- [Configuration Reference](../reference/configuration/) - Cache options
-- [Configure Caching](../how-to/configure-caching/) - How to customize
-- [Image Processing Pipeline](./image-processing-pipeline/) - What gets cached
+- [Configuration Reference](../../reference/configuration/) - Cache options
+- [Configure Caching](../../how-to/configure-caching/) - How to customize
+- [Image Processing Pipeline](../image-processing-pipeline/) - What gets cached

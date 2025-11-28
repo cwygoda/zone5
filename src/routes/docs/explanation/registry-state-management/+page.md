@@ -288,7 +288,7 @@ When the condition becomes false, images are unregistered.
 
 ## Related
 
-- [Architecture Overview](./architecture-overview/) - System design
-- [Component Props Reference](../reference/component-props/) - Component API
-- [Keyboard Shortcuts](../reference/keyboard-shortcuts/) - Navigation controls
+- [Architecture Overview](../architecture-overview/) - System design
+- [Component Props Reference](../../reference/component-props/) - Component API
+- [Keyboard Shortcuts](../../reference/keyboard-shortcuts/) - Navigation controls
 

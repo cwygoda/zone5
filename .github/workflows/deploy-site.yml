@@ -25,7 +25,7 @@ jobs:
         uses: dagger/dagger-for-github@v8.2.0
         with:
           version: 'latest'
-          args: -m ./dagger build-site --source=. export --path=./build
+          args: -m ./dagger build-site --source=. --base-path=/${{ github.event.repository.name }} export --path=./build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

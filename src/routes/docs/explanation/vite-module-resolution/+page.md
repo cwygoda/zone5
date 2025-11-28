@@ -295,6 +295,6 @@ DEBUG=vite:zone5 pnpm dev
 
 ## Related
 
-- [Architecture Overview](./architecture-overview/) - How plugins fit together
-- [Vite Plugin API](../reference/vite-plugin-api/) - Plugin API reference
-- [Configuration Reference](../reference/configuration/) - Plugin options
+- [Architecture Overview](../architecture-overview/) - How plugins fit together
+- [Vite Plugin API](../../reference/vite-plugin-api/) - Plugin API reference
+- [Configuration Reference](../../reference/configuration/) - Plugin options

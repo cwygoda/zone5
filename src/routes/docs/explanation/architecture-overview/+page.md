@@ -207,5 +207,5 @@ What's meant to be stable:
 
 ## Related
 
-- [Image Processing Pipeline](./image-processing-pipeline/) - Processing details
-- [Registry State Management](./registry-state-management/) - Component state
+- [Image Processing Pipeline](../image-processing-pipeline/) - Processing details
+- [Registry State Management](../registry-state-management/) - Component state

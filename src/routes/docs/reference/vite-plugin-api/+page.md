@@ -117,6 +117,6 @@ Currently supports:
 
 ## Related
 
-- [Configuration Reference](./configuration/) - `.zone5.toml` options
-- [Vite Module Resolution](../explanation/vite-module-resolution/) - How module resolution works
-- [Add to Existing Project](../tutorials/add-to-existing-project/) - Setup tutorial
+- [Configuration Reference](../configuration/) - `.zone5.toml` options
+- [Vite Module Resolution](../../explanation/vite-module-resolution/) - How module resolution works
+- [Add to Existing Project](../../tutorials/add-to-existing-project/) - Setup tutorial

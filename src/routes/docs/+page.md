@@ -8,8 +8,8 @@ Build optimized image galleries for SvelteKit with automatic processing, lightbo
 
 New to Zone5? Start here:
 
-- [Getting Started Tutorial](/docs/tutorials/getting-started) - Create your first gallery in 5 minutes
-- [Add to Existing Project](/docs/tutorials/add-to-existing-project) - Integrate Zone5 into a SvelteKit app
+- [Getting Started Tutorial](./tutorials/getting-started) - Create your first gallery in 5 minutes
+- [Add to Existing Project](./tutorials/add-to-existing-project) - Integrate Zone5 into a SvelteKit app
 
 ## How-To Guides
 
@@ -17,9 +17,9 @@ Task-oriented guides for common needs:
 
 ### Configuration
 
-- [Customize Image Variants](/docs/how-to/customize-image-variants) - Adjust sizes for your use case
-- [Configure Caching](/docs/how-to/configure-caching) - Optimize build performance
-- [Use Different Package Managers](/docs/how-to/use-different-package-managers) - npm, pnpm, yarn, bun
+- [Customize Image Variants](./how-to/customize-image-variants) - Adjust sizes for your use case
+- [Configure Caching](./how-to/configure-caching) - Optimize build performance
+- [Use Different Package Managers](./how-to/use-different-package-managers) - npm, pnpm, yarn, bun
 
 <!--
 ### Styling
@@ -31,23 +31,23 @@ Complete API documentation:
 
 ### Core
 
-- [Configuration](/docs/reference/configuration) - `.zone5.toml` options
-- [Component Props](/docs/reference/component-props) - Zone5, Zone5Img, Zone5Lightbox props
-- [CLI Commands](/docs/reference/cli-commands) - `zone5 create` command
+- [Configuration](./reference/configuration) - `.zone5.toml` options
+- [Component Props](./reference/component-props) - Zone5, Zone5Img, Zone5Lightbox props
+- [CLI Commands](./reference/cli-commands) - `zone5 create` command
 
 ### Plugins
 
-- [Vite Plugin API](/docs/reference/vite-plugin-api) - Build-time processing
-- [Remark Plugin API](/docs/reference/remark-plugin-api) - Markdown image transformation
+- [Vite Plugin API](./reference/vite-plugin-api) - Build-time processing
+- [Remark Plugin API](./reference/remark-plugin-api) - Markdown image transformation
 
 ### Data
 
-- [ItemFeature Schema](/docs/reference/itemfeature-schema) - GeoJSON output format
-- [Package Exports](/docs/reference/package-exports) - Import paths
+- [ItemFeature Schema](./reference/itemfeature-schema) - GeoJSON output format
+- [Package Exports](./reference/package-exports) - Import paths
 
 ### UI
 
-- [Keyboard Shortcuts](/docs/reference/keyboard-shortcuts) - Lightbox navigation
+- [Keyboard Shortcuts](./reference/keyboard-shortcuts) - Lightbox navigation
 
 ## Explanation
 
@@ -55,18 +55,18 @@ Understand the design and architecture:
 
 ### Architecture
 
-- [Architecture Overview](/docs/explanation/architecture-overview) - How the four systems connect
-- [Image Processing Pipeline](/docs/explanation/image-processing-pipeline) - Variants, blurhash, EXIF
+- [Architecture Overview](./explanation/architecture-overview) - How the four systems connect
+- [Image Processing Pipeline](./explanation/image-processing-pipeline) - Variants, blurhash, EXIF
 
 ### Design Decisions
 
-- [GeoJSON Format Choice](/docs/explanation/geojson-format-choice) - Why ItemFeature uses GeoJSON
-- [Caching Strategy](/docs/explanation/caching-strategy) - Hash-based invalidation
+- [GeoJSON Format Choice](./explanation/geojson-format-choice) - Why ItemFeature uses GeoJSON
+- [Caching Strategy](./explanation/caching-strategy) - Hash-based invalidation
 
 ### Implementation
 
-- [Registry State Management](/docs/explanation/registry-state-management) - Cross-gallery navigation
-- [Vite Module Resolution](/docs/explanation/vite-module-resolution) - Virtual modules and `?z5`
+- [Registry State Management](./explanation/registry-state-management) - Cross-gallery navigation
+- [Vite Module Resolution](./explanation/vite-module-resolution) - Virtual modules and `?z5`
 
 ## Quick Links
 

@@ -154,10 +154,10 @@ Congratulations! You've created your first Zone5 gallery.
 
 **Continue learning:**
 
-- [Add Zone5 to an Existing Project](./add-to-existing-project/) - Integrate into your current SvelteKit app
-- [Customize Image Variants](../how-to/customize-image-variants/) - Configure image sizes and quality
+- [Add Zone5 to an Existing Project](../add-to-existing-project/) - Integrate into your current SvelteKit app
+- [Customize Image Variants](../../how-to/customize-image-variants/) - Configure image sizes and quality
 
 **Reference:**
 
-- [Configuration Reference](../reference/configuration/) - All `.zone5.toml` options
-- [CLI Commands](../reference/cli-commands/) - Full CLI documentation
+- [Configuration Reference](../../reference/configuration/) - All `.zone5.toml` options
+- [CLI Commands](../../reference/cli-commands/) - Full CLI documentation

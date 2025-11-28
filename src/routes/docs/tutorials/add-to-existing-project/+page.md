@@ -223,5 +223,5 @@ declare module '*?z5' {
 
 Your project now has Zone5 integrated! Continue with:
 
-- [Customize Image Variants](../how-to/customize-image-variants/) - Optimize image sizes
-- [Configuration Reference](../reference/configuration/) - All config options
+- [Customize Image Variants](../../how-to/customize-image-variants/) - Optimize image sizes
+- [Configuration Reference](../../reference/configuration/) - All config options

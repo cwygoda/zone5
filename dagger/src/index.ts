@@ -174,14 +174,16 @@ export class Zone5 {
 	 * Build the documentation site
 	 *
 	 * @param source Project source directory
+	 * @param basePath URL prefix for the site (e.g., "/zone5" for GitHub Pages)
 	 * @returns The built site as a directory
 	 */
 	@func()
-	async buildSite(source: Directory): Promise<Directory> {
+	async buildSite(source: Directory, basePath: string = ''): Promise<Directory> {
 		const container = await this.setupProject(source);
 
 		// Build the package first (required for site), then build the site
 		return container
+			.withEnvVariable('BASE_PATH', basePath)
 			.withExec(['pnpm', 'build'])
 			.withExec(['pnpm', 'build:site'])
 			.directory('/workspace/dist-site');

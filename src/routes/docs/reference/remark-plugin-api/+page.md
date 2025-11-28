@@ -235,5 +235,5 @@ Image paths are relative to the markdown file location.
 
 ## Related
 
-- [Getting Started](../tutorials/getting-started/) - Basic usage
-- [Component Props Reference](./component-props/) - Zone5 component API
+- [Getting Started](../../tutorials/getting-started/) - Basic usage
+- [Component Props Reference](../component-props/) - Zone5 component API

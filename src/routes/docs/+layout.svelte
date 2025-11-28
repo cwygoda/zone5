@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 
-	import { resolve } from '$app/paths';
+	import { base, resolve } from '$app/paths';
 	import { page } from '$app/state';
 
 	import SiteHeader from '$components/SiteHeader.svelte';
@@ -30,11 +30,12 @@
 	}
 
 	function isActive(path: string): boolean {
-		return page.url.pathname === path || page.url.pathname === path + '/';
+		const fullPath = base + path;
+		return page.url.pathname === fullPath || page.url.pathname === fullPath + '/';
 	}
 
 	function isSectionActive(section: string): boolean {
-		return page.url.pathname.includes(`/docs/${section}`);
+		return page.url.pathname.includes(`${base}/docs/${section}`);
 	}
 
 	const navigation = [

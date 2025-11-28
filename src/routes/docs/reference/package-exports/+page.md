@@ -183,6 +183,6 @@ import type { ImageData } from 'zone5/components';
 
 ## Related
 
-- [Component Props Reference](./component-props/) - Component API
-- [Vite Plugin API](./vite-plugin-api/) - Plugin documentation
-- [Remark Plugin API](./remark-plugin-api/) - Markdown plugin docs
+- [Component Props Reference](../component-props/) - Component API
+- [Vite Plugin API](../vite-plugin-api/) - Plugin documentation
+- [Remark Plugin API](../remark-plugin-api/) - Markdown plugin docs

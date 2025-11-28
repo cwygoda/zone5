@@ -233,6 +233,6 @@ cache = "/tmp/zone5"       # Temporary
 
 ## Related
 
-- [Architecture Overview](./architecture-overview/) - How systems connect
-- [Caching Strategy](./caching-strategy/) - Cache details
-- [ItemFeature Schema](../reference/itemfeature-schema/) - Output format
+- [Architecture Overview](../architecture-overview/) - How systems connect
+- [Caching Strategy](../caching-strategy/) - Cache details
+- [ItemFeature Schema](../../reference/itemfeature-schema/) - Output format

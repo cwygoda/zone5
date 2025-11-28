@@ -28,4 +28,4 @@ npx zone5 create ./photos ./gallery --package-manager skip
 
 ## Related
 
-- [CLI Commands Reference](../reference/cli-commands/) - Full CLI documentation
+- [CLI Commands Reference](../../reference/cli-commands/) - Full CLI documentation

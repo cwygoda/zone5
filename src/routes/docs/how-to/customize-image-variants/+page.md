@@ -142,5 +142,5 @@ In DevTools Elements panel, check the `srcset` attribute:
 
 ## Related
 
-- [Configuration Reference](../reference/configuration/) - All config options
-- [Image Processing Pipeline](../explanation/image-processing-pipeline/) - How variants work
+- [Configuration Reference](../../reference/configuration/) - All config options
+- [Image Processing Pipeline](../../explanation/image-processing-pipeline/) - How variants work

@@ -26,6 +26,9 @@ const config = {
 			'zone5': './src/lib',
 			'$components': './src/components',
 		},
+		paths: {
+			base: process.env.BASE_PATH || '',
+		},
 	},
 };
 

@@ -79,6 +79,6 @@ const config = await load('/path/to/project');
 
 ## Related
 
-- [Customize Image Variants](../how-to/customize-image-variants/) - How to optimize variant configuration
-- [Caching Strategy](../explanation/caching-strategy/) - How the cache works
-- [Configure Caching](../how-to/configure-caching/) - Managing the cache directory
+- [Customize Image Variants](../../how-to/customize-image-variants/) - How to optimize variant configuration
+- [Caching Strategy](../../explanation/caching-strategy/) - How the cache works
+- [Configure Caching](../../how-to/configure-caching/) - Managing the cache directory

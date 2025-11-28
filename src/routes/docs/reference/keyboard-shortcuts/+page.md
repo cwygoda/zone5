@@ -120,5 +120,5 @@ Users with `prefers-reduced-motion` should see instant transitions:
 
 ## Related
 
-- [Component Props Reference](./component-props/) - Component API
-- [Registry State Management](../explanation/registry-state-management/) - Navigation system
+- [Component Props Reference](../component-props/) - Component API
+- [Registry State Management](../../explanation/registry-state-management/) - Navigation system

@@ -156,5 +156,5 @@ This is valid GeoJSON per RFC 7946. Components check for null before using coord
 
 ## Related
 
-- [ItemFeature Schema](../reference/itemfeature-schema/) - Full schema reference
-- [Architecture Overview](./architecture-overview/) - System design
+- [ItemFeature Schema](../../reference/itemfeature-schema/) - Full schema reference
+- [Architecture Overview](../architecture-overview/) - System design

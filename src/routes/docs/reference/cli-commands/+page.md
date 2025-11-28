@@ -98,6 +98,6 @@ npx zone5 create --help
 
 ## Related
 
-- [Getting Started](../tutorials/getting-started/) - Tutorial using the CLI
-- [Configuration Reference](./configuration/) - `.zone5.toml` options
-- [Use Different Package Managers](../how-to/use-different-package-managers/) - Package manager details
+- [Getting Started](../../tutorials/getting-started/) - Tutorial using the CLI
+- [Configuration Reference](../configuration/) - `.zone5.toml` options
+- [Use Different Package Managers](../../how-to/use-different-package-managers/) - Package manager details
