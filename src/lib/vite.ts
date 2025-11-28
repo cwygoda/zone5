@@ -49,7 +49,12 @@ const serve =
 		next();
 	};
 
-export function zone5(cwd?: string): Plugin {
+export interface Zone5PluginOptions {
+	cwd?: string;
+	basePath?: string;
+}
+
+export function zone5(options: Zone5PluginOptions = {}): Plugin {
 	let viteConfig: ResolvedConfig;
 	let basePath: string;
 	let zone5Config: ConfigType;
@@ -60,8 +65,11 @@ export function zone5(cwd?: string): Plugin {
 
 		async configResolved(cfg) {
 			viteConfig = cfg;
-			zone5Config = await load(cwd);
-			basePath = createBasePath(zone5Config.base.namespace, viteConfig.base);
+			zone5Config = await load(options.cwd);
+			const base = options.basePath
+				? `${options.basePath.replace(/\/$/, '')}/${viteConfig.base.replace(/^\//, '')}`
+				: viteConfig.base;
+			basePath = createBasePath(zone5Config.base.namespace, base);
 		},
 
 		async resolveId(id, importer) {

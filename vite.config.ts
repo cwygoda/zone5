@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config';
 import { zone5 } from './src/lib/vite';
 
 export default defineConfig({
-	plugins: [zone5(), tailwindcss(), sveltekit()],
+	plugins: [zone5({ basePath: process.env.BASE_PATH || '' }), tailwindcss(), sveltekit()],
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 		environment: 'jsdom',
