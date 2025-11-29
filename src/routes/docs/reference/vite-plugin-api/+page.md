@@ -28,7 +28,7 @@ interface Zone5PluginOptions {
 | Option     | Type     | Default     | Description                                                                          |
 | ---------- | -------- | ----------- | ------------------------------------------------------------------------------------ |
 | `cwd`      | `string` | `undefined` | Working directory for loading `.zone5.toml`. If not specified, uses `process.cwd()`. |
-| `basePath` | `string` | `undefined` | URL prefix for assets. Prepended to SvelteKit's `paths.base`. Useful for deploying to subdirectories. |
+| `basePath` | `string` | `undefined` | URL prefix for assets. Overrides SvelteKit's `paths.base` when specified. Useful for deploying to subdirectories. |
 
 ### Return Value
 
@@ -52,7 +52,18 @@ export default defineConfig({
 
 ## Deploying to a Subdirectory
 
-When deploying to a subdirectory (e.g., GitHub Pages at `/<repo-name>/`), use the `basePath` option:
+When deploying to a subdirectory (e.g., GitHub Pages at `/<repo-name>/`), use the `BASE_PATH` environment variable for both SvelteKit and Zone5:
+
+```typescript
+// svelte.config.ts
+const config = {
+  kit: {
+    paths: {
+      base: process.env.BASE_PATH || '',
+    },
+  },
+};
+```
 
 ```typescript
 // vite.config.ts
@@ -64,13 +75,11 @@ export default defineConfig({
 });
 ```
 
-The `basePath` is prepended to SvelteKit's `paths.base`. For example:
+Then build with the environment variable set:
 
-| `basePath` | `paths.base` | Final asset URL prefix |
-| ---------- | ------------ | ---------------------- |
-| `/docs`    | `/`          | `/docs/@zone5/`        |
-| `/docs`    | `/app`       | `/docs/app/@zone5/`    |
-| (none)     | `/app`       | `/app/@zone5/`         |
+```bash
+BASE_PATH=/my-app pnpm build
+```
 
 ## Plugin Order
 
