@@ -66,10 +66,7 @@ export function zone5(options: Zone5PluginOptions = {}): Plugin {
 		async configResolved(cfg) {
 			viteConfig = cfg;
 			zone5Config = await load(options.cwd);
-			const base = options.basePath
-				? `${options.basePath.replace(/\/$/, '')}/${viteConfig.base.replace(/^\//, '')}`
-				: viteConfig.base;
-			basePath = createBasePath(zone5Config.base.namespace, base);
+			basePath = createBasePath(zone5Config.base.namespace, options.basePath ?? viteConfig.base);
 		},
 
 		async resolveId(id, importer) {
