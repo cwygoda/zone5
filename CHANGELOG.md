@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/cwygoda/zone5/compare/v1.2.1...v1.3.0) (2025-11-29)
+
+
+### Features
+
+* add base path support ([8510a85](https://github.com/cwygoda/zone5/commit/8510a85ef0c7dafecdbb1069994783f551b8f77d))
+
 ## [1.2.1](https://github.com/cwygoda/zone5/compare/v1.2.0...v1.2.1) (2025-11-27)
 
 
