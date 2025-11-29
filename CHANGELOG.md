@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/cwygoda/zone5/compare/v1.3.0...v1.3.1) (2025-11-29)
+
+
+### Bug Fixes
+
+* fix double base path issue ([b79e8f2](https://github.com/cwygoda/zone5/commit/b79e8f28da55b34650b31cc8b6651e3287f0f4f3))
+
 # [1.3.0](https://github.com/cwygoda/zone5/compare/v1.2.1...v1.3.0) (2025-11-29)
 
 
