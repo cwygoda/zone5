@@ -1,59 +1,60 @@
 import { expect, test } from '@playwright/test';
 import { type ChildProcess, spawn } from 'node:child_process';
-import { request as httpRequest } from 'node:http';
-import { createServer } from 'node:net';
 import { join } from 'node:path';
 
 /**
- * Find an available port by attempting to bind to it
+ * Start dev server and wait for it to be ready, returning the actual port
  */
-async function getAvailablePort(startPort = 5173): Promise<number> {
+async function startDevServer(
+	cwd: string,
+	timeout = 30000,
+): Promise<{ process: ChildProcess; port: number }> {
 	return new Promise((resolve, reject) => {
-		const server = createServer();
-		server.listen(startPort, () => {
-			const { port } = server.address() as { port: number };
-			server.close(() => resolve(port));
+		const serverProcess = spawn('pnpm', ['dev'], {
+			cwd,
+			stdio: 'pipe',
+			detached: true,
 		});
-		server.on('error', (err: NodeJS.ErrnoException) => {
-			if (err.code === 'EADDRINUSE') {
-				resolve(getAvailablePort(startPort + 1));
-			} else {
-				reject(err);
+
+		const timeoutId = setTimeout(() => {
+			serverProcess.kill();
+			reject(new Error('Timeout waiting for dev server to start'));
+		}, timeout);
+
+		// Parse output to find the actual port Vite is using
+		const onData = (data: Buffer) => {
+			const output = data.toString();
+			console.log(`[dev server]: ${output}`);
+
+			// Strip ANSI escape codes and match Vite's output: "Local:   http://localhost:5173/"
+			// eslint-disable-next-line no-control-regex
+			const cleanOutput = output.replace(/\x1b\[[0-9;]*m/g, '');
+			const match = cleanOutput.match(/Local:\s+http:\/\/localhost:(\d+)/);
+			if (match) {
+				clearTimeout(timeoutId);
+				const port = parseInt(match[1], 10);
+				console.log(`Dev server started on port ${port}`);
+				resolve({ process: serverProcess, port });
+			}
+		};
+
+		serverProcess.stdout?.on('data', onData);
+		serverProcess.stderr?.on('data', (data) => {
+			console.error(`[dev server error]: ${data}`);
+		});
+
+		serverProcess.on('error', (err) => {
+			clearTimeout(timeoutId);
+			reject(err);
+		});
+
+		serverProcess.on('exit', (code) => {
+			clearTimeout(timeoutId);
+			if (code !== 0) {
+				reject(new Error(`Dev server exited with code ${code}`));
 			}
 		});
 	});
-}
-
-/**
- * Wait for HTTP server to be ready by making requests
- */
-async function waitForPort(port: number, timeout = 30000): Promise<void> {
-	const startTime = Date.now();
-	while (Date.now() - startTime < timeout) {
-		try {
-			await new Promise<void>((resolve, reject) => {
-				const req = httpRequest(
-					{
-						hostname: 'localhost',
-						port,
-						path: '/',
-						method: 'GET',
-					},
-					() => {
-						resolve();
-					},
-				);
-				req.on('error', () => {
-					reject(new Error('Server not ready'));
-				});
-				req.end();
-			});
-			return;
-		} catch {
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		}
-	}
-	throw new Error(`Timeout waiting for port ${port} to be ready`);
 }
 
 test.describe('Site navigation', () => {
@@ -61,24 +62,12 @@ test.describe('Site navigation', () => {
 	let port: number;
 
 	test.beforeAll(async () => {
-		port = await getAvailablePort();
-		console.log(`Starting dev server on port ${port}...`);
+		console.log('Starting dev server...');
 
-		serverProcess = spawn('pnpm', ['dev', '--port', port.toString()], {
-			cwd: join(import.meta.dirname, '..', '..'),
-			stdio: 'pipe',
-			detached: true,
-		});
+		const server = await startDevServer(join(import.meta.dirname, '..', '..'));
+		serverProcess = server.process;
+		port = server.port;
 
-		// Log server output for debugging
-		serverProcess.stdout?.on('data', (data) => {
-			console.log(`[dev server]: ${data}`);
-		});
-		serverProcess.stderr?.on('data', (data) => {
-			console.error(`[dev server error]: ${data}`);
-		});
-
-		await waitForPort(port);
 		console.log('Dev server is ready');
 	});
 
@@ -115,18 +104,19 @@ test.describe('Site navigation', () => {
 
 		// Step 1: Go to landing page
 		console.log('Navigating to landing page...');
-		await page.goto(`http://localhost:${port}/`, { waitUntil: 'networkidle' });
+		await page.goto(`http://localhost:${port}/`, { waitUntil: 'domcontentloaded' });
+		// Wait for landing page content to be ready
+		await expect(page.locator('a[href*="/color"]').first()).toBeVisible({ timeout: 10000 });
 
 		// Step 2: Click the /color link
 		console.log('Clicking /color link...');
 		const colorLink = page.locator('a[href*="/color"]').first();
-		await expect(colorLink).toBeVisible();
 		await colorLink.click();
 
-		// Wait for navigation and page to settle
-		await page.waitForURL('**/color');
-		await page.waitForLoadState('networkidle');
-		await page.waitForTimeout(500); // Extra time for effects to settle
+		// Wait for images to be present (client-side navigation doesn't need waitForURL)
+		const images = page.locator('[data-zone5-img="true"]');
+		await expect(images.first()).toBeVisible({ timeout: 10000 });
+		await expect(page).toHaveURL(/\/color/);
 
 		// Check for errors after first visit
 		const errorsAfterFirst = [...pageErrors];
@@ -134,28 +124,22 @@ test.describe('Site navigation', () => {
 			errorsAfterFirst.filter((e) => e.message.includes('effect_update_depth_exceeded')),
 		).toHaveLength(0);
 
-		// Verify images loaded
-		const images = page.locator('[data-zone5-img="true"]');
-		await expect(images.first()).toBeVisible({ timeout: 10000 });
-
 		// Step 3: Navigate back to landing page using client-side navigation (not page.goto)
 		console.log('Navigating back to landing page via client-side link...');
 		const homeLink = page.locator('a[href="/"]').first();
 		await expect(homeLink).toBeVisible();
 		await homeLink.click();
-		await page.waitForURL(`http://localhost:${port}/`);
-		await page.waitForLoadState('networkidle');
+		// Wait for landing page to be ready again
+		await expect(page.locator('a[href*="/color"]').first()).toBeVisible({ timeout: 10000 });
 
 		// Step 4: Click the /color link again (this is where the bug occurs)
 		console.log('Clicking /color link again (second visit)...');
 		const colorLinkAgain = page.locator('a[href*="/color"]').first();
-		await expect(colorLinkAgain).toBeVisible();
 		await colorLinkAgain.click();
 
-		// Wait for navigation and page to settle
-		await page.waitForURL('**/color');
-		await page.waitForLoadState('networkidle');
-		await page.waitForTimeout(500); // Extra time for effects to settle
+		// Wait for images to be present
+		await expect(images.first()).toBeVisible({ timeout: 10000 });
+		await expect(page).toHaveURL(/\/color/);
 
 		// Check for errors after second visit
 		const pageErrorsWithDepth = pageErrors.filter((e) =>
@@ -175,9 +159,6 @@ test.describe('Site navigation', () => {
 		expect(pageErrorsWithDepth).toHaveLength(0);
 		expect(consoleErrorsWithDepth).toHaveLength(0);
 
-		// Verify images still loaded correctly
-		await expect(images.first()).toBeVisible({ timeout: 10000 });
-
 		console.log('✓ Navigation test passed!');
 	});
 
@@ -194,44 +175,51 @@ test.describe('Site navigation', () => {
 
 		// Step 1: Go to landing page
 		console.log('Navigating to landing page...');
-		await page.goto(`http://localhost:${port}/`, { waitUntil: 'networkidle' });
+		await page.goto(`http://localhost:${port}/`, { waitUntil: 'domcontentloaded' });
+		// Wait for landing page content to be ready
+		const colorLink = page.locator('a[href*="/color"]').first();
+		await expect(colorLink).toBeVisible({ timeout: 10000 });
 
 		// Step 2: Click the /color link
 		console.log('Clicking /color link...');
-		const colorLink = page.locator('a[href*="/color"]').first();
-		await expect(colorLink).toBeVisible();
 		await colorLink.click();
 
-		// Wait for navigation
-		await page.waitForURL('**/color');
-		await page.waitForLoadState('networkidle');
-
-		// Get all images and wait for them to be visible
+		// Wait for images to be present (client-side navigation doesn't need waitForURL)
 		const images = page.locator('[data-zone5-img="true"]');
+		await expect(images.first()).toBeVisible({ timeout: 10000 });
+		await expect(page).toHaveURL(/\/color/);
+
+		// Get image count
 		const imageCount = await images.count();
 		console.log(`First visit: Found ${imageCount} images`);
 
-		// Wait for all images to load on first visit
-		await page.waitForTimeout(1000);
+		// Wait for images to load (check for opacity-100 class which indicates loaded)
+		await expect(async () => {
+			const visibleCount = await images.locator('img.opacity-100').count();
+			expect(visibleCount).toBeGreaterThan(0);
+		}).toPass({ timeout: 10000 });
 
-		// Count visible images (opacity-100) on first visit
 		const visibleOnFirst = await images.locator('img.opacity-100').count();
 		console.log(`First visit: ${visibleOnFirst}/${imageCount} images visible`);
 
 		// Step 3: Navigate back to landing page
 		console.log('Navigating back to landing page...');
-		await page.goto(`http://localhost:${port}/`, { waitUntil: 'networkidle' });
+		await page.goto(`http://localhost:${port}/`, { waitUntil: 'domcontentloaded' });
+		await expect(colorLink).toBeVisible({ timeout: 10000 });
 
 		// Step 4: Click the /color link again
 		console.log('Clicking /color link again (second visit)...');
 		await colorLink.click();
 
-		// Wait for navigation
-		await page.waitForURL('**/color');
-		await page.waitForLoadState('networkidle');
+		// Wait for images to be present
+		await expect(images.first()).toBeVisible({ timeout: 10000 });
+		await expect(page).toHaveURL(/\/color/);
 
 		// Wait for images to load on second visit
-		await page.waitForTimeout(1000);
+		await expect(async () => {
+			const visibleCount = await images.locator('img.opacity-100').count();
+			expect(visibleCount).toBeGreaterThan(0);
+		}).toPass({ timeout: 10000 });
 
 		// Count visible images on second visit
 		const imagesAfterNav = page.locator('[data-zone5-img="true"]');
