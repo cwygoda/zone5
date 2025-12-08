@@ -1,26 +1,54 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 
+	import ExifOverlay from './ExifOverlay.svelte';
 	import Img from './Zone5Img.svelte';
+	import { useMapUrl } from './Zone5Provider.svelte';
 	import CloseButton from './atoms/CloseButton.svelte';
+	import InfoButton from './atoms/InfoButton.svelte';
 	import NextButton from './atoms/NextButton.svelte';
 	import PrevButton from './atoms/PrevButton.svelte';
 	import portal from './portal';
-	import type { ImageData } from './types';
+	import type { ImageData, MapUrlBuilder } from './types';
 
 	interface Props {
 		force?: boolean;
 		image?: ImageData;
+		mapUrl?: MapUrlBuilder;
 		onclose: () => void;
 		onnext?: () => void;
 		onprevious?: () => void;
 		transitionDuration?: number;
 	}
 
-	let { force, image, onclose, onnext, onprevious, transitionDuration = 300 }: Props = $props();
+	let { force, image, mapUrl, onclose, onnext, onprevious, transitionDuration = 300 }: Props =
+		$props();
+
+	const contextMapUrl = useMapUrl();
+	const effectiveMapUrl = $derived(mapUrl ?? contextMapUrl);
 
 	let transitioning = $state(false);
+	let showInfo = $state(false);
 	let visible = $derived(image && !transitioning);
+
+	const hasExifData = $derived(() => {
+		if (!image) return false;
+		const p = image.properties;
+		return !!(
+			p.make ||
+			p.model ||
+			p.lens ||
+			p.dateTime ||
+			p.exposureTime ||
+			p.fNumber ||
+			p.iso ||
+			p.focalLength ||
+			p.artist ||
+			p.copyright ||
+			image.geometry
+		);
+	});
+
 	let onFigureOutroEnd: (() => void) | undefined = undefined;
 	const nextHandler = () => {
 		transitioning = true;
@@ -36,7 +64,18 @@
 		switch (evt.key) {
 			case 'Escape':
 				evt.preventDefault();
-				onclose();
+				if (showInfo) {
+					showInfo = false;
+				} else {
+					onclose();
+				}
+				break;
+			case 'i':
+			case 'I':
+				if (visible && hasExifData()) {
+					evt.preventDefault();
+					showInfo = !showInfo;
+				}
 				break;
 			case ' ':
 				// Only prevent default for spacebar when dialog is active
@@ -79,6 +118,16 @@
 				{onclose}
 				data-zone5-close
 			/>
+			{#if hasExifData()}
+				<InfoButton
+					class={[
+						'absolute left-0 top-0 z-30 cursor-pointer p-4',
+						'transition delay-150 duration-300 hover:bg-zinc-100/10',
+					]}
+					oninfo={() => (showInfo = true)}
+					data-zone5-info
+				/>
+			{/if}
 			{#if onprevious}
 				<PrevButton
 					class={[
@@ -120,6 +169,9 @@
 					</figcaption>
 				{/if}
 			</figure>
+		{/if}
+		{#if showInfo && image}
+			<ExifOverlay {image} mapUrl={effectiveMapUrl} onclose={() => (showInfo = false)} />
 		{/if}
 	</section>
 {/if}

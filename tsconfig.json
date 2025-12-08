@@ -13,5 +13,6 @@
 		"allowImportingTsExtensions": true,
 		"allowArbitraryExtensions": true,
 		"isolatedModules": true
-	}
+	},
+	"exclude": ["src/cli/templates/**"]
 }

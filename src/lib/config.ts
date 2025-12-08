@@ -12,6 +12,7 @@ const BaseConfigSchema = z.object({
 	root: z.string().default(cwd()),
 	cache: z.string().default(join(cwd(), '.zone5')),
 	namespace: z.string().default('@zone5'),
+	mapUrl: z.string().optional(),
 });
 
 export type BaseConfigType = z.infer<typeof BaseConfigSchema>;

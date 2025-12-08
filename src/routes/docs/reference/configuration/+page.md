@@ -12,13 +12,14 @@ Zone5 looks for `.zone5.toml` in the current directory and walks up the director
 
 ### [base] Section
 
-Controls where Zone5 finds and stores files.
+Controls where Zone5 finds and stores files, and configures display options.
 
 | Option      | Type   | Default    | Description                                                   |
 | ----------- | ------ | ---------- | ------------------------------------------------------------- |
 | `root`      | string | `"."`      | Source image directory. Paths in config are relative to this. |
 | `cache`     | string | `".zone5"` | Directory where processed images and metadata are stored.     |
 | `namespace` | string | `"@zone5"` | URL namespace for serving images. Used in asset URLs.         |
+| `mapUrl`    | string | (none)     | URL template for GPS coordinates in lightbox. See [Map URL Configuration](#map-url-configuration). |
 
 ### [processor] Section
 
@@ -66,6 +67,55 @@ root = "content/photos"
 # Fewer variants for smaller bundle
 variants = [400, 800, 1600]
 ```
+
+## Map URL Configuration
+
+The `mapUrl` option configures where GPS coordinates link to in the EXIF info overlay. When an image has GPS data, clicking the location opens the configured map service.
+
+### Template Placeholders
+
+| Placeholder | Description              |
+| ----------- | ------------------------ |
+| `{lat}`     | Latitude (decimal degrees)  |
+| `{lon}`     | Longitude (decimal degrees) |
+
+### Default Behavior
+
+If `mapUrl` is not set, Zone5 uses Google Earth:
+
+```
+https://earth.google.com/web/@{lat},{lon},0a,1000d,35y,0h,0t,0r
+```
+
+### Map Provider Examples
+
+```toml
+# Google Earth (default)
+mapUrl = "https://earth.google.com/web/@{lat},{lon},0a,1000d,35y,0h,0t,0r"
+
+# Google Maps (satellite view)
+mapUrl = "https://www.google.com/maps?q={lat},{lon}&t=k"
+
+# OpenStreetMap
+mapUrl = "https://www.openstreetmap.org/?mlat={lat}&mlon={lon}&zoom=15"
+
+# Apple Maps
+mapUrl = "https://maps.apple.com/?ll={lat},{lon}"
+```
+
+### Environment Variable Override
+
+For more flexibility, you can set the map URL via environment variable in your SvelteKit app. The `PUBLIC_ZONE5_MAP_URL_TEMPLATE` environment variable takes priority over the config file:
+
+```bash
+# .env
+PUBLIC_ZONE5_MAP_URL_TEMPLATE=https://www.openstreetmap.org/?mlat={lat}&mlon={lon}&zoom=15
+```
+
+Priority order:
+1. Environment variable `PUBLIC_ZONE5_MAP_URL_TEMPLATE`
+2. Config file `[base].mapUrl`
+3. Default (Google Earth)
 
 ## Loading Configuration Programmatically
 

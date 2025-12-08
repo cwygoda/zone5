@@ -6,3 +6,5 @@ export interface ImageData extends ItemFeature {
 		title?: string;
 	};
 }
+
+export type MapUrlBuilder = (lat: number, lon: number) => string;
