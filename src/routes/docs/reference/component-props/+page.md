@@ -10,9 +10,16 @@ Root component that provides context for lightbox functionality.
 
 ### Props
 
-| Prop       | Type      | Default    | Description             |
-| ---------- | --------- | ---------- | ----------------------- |
-| `children` | `Snippet` | (required) | Child content to render |
+| Prop       | Type            | Default     | Description                                    |
+| ---------- | --------------- | ----------- | ---------------------------------------------- |
+| `children` | `Snippet`       | (required)  | Child content to render                        |
+| `mapUrl`   | `MapUrlBuilder` | `undefined` | Custom map URL builder for GPS coordinates     |
+
+### MapUrlBuilder Type
+
+```typescript
+type MapUrlBuilder = (lat: number, lon: number) => string;
+```
 
 ### Context
 
@@ -36,6 +43,21 @@ Provides an image registry context that:
 ```
 
 Place in your root `+layout.svelte` to enable lightbox across all pages.
+
+### Custom Map Provider
+
+```svelte
+<script>
+  import { Zone5Provider, type MapUrlBuilder } from 'zone5/components';
+
+  const mapUrl: MapUrlBuilder = (lat, lon) =>
+    `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=15`;
+</script>
+
+<Zone5Provider {mapUrl}>
+  <slot />
+</Zone5Provider>
+```
 
 ---
 
@@ -132,23 +154,36 @@ Full-screen modal lightbox for viewing images.
 
 ### Props
 
-| Prop                 | Type         | Default      | Description                            |
-| -------------------- | ------------ | ------------ | -------------------------------------- |
-| `image`              | `ImageData`  | `undefined`  | Current image to display               |
-| `force`              | `boolean`    | `false`      | Force lightbox open even without image |
-| `onclose`            | `() => void` | (required)   | Called when lightbox should close      |
-| `onprevious`         | `() => void` | `undefined`  | Called for previous image navigation   |
-| `onnext`             | `() => void` | `undefined`  | Called for next image navigation       |
-| `transitionDuration` | `number`     | `300`        | Transition duration in milliseconds    |
+| Prop                 | Type            | Default     | Description                            |
+| -------------------- | --------------- | ----------- | -------------------------------------- |
+| `image`              | `ImageData`     | `undefined` | Current image to display               |
+| `force`              | `boolean`       | `false`     | Force lightbox open even without image |
+| `mapUrl`             | `MapUrlBuilder` | `undefined` | Custom map URL builder for GPS coords  |
+| `onclose`            | `() => void`    | (required)  | Called when lightbox should close      |
+| `onprevious`         | `() => void`    | `undefined` | Called for previous image navigation   |
+| `onnext`             | `() => void`    | `undefined` | Called for next image navigation       |
+| `transitionDuration` | `number`        | `300`       | Transition duration in milliseconds    |
 
 ### Keyboard Shortcuts
 
-| Key          | Action         |
-| ------------ | -------------- |
-| `Escape`     | Close lightbox |
-| `ArrowLeft`  | Previous image |
-| `ArrowRight` | Next image     |
-| `Space`      | Next image     |
+| Key          | Action                   |
+| ------------ | ------------------------ |
+| `Escape`     | Close lightbox (or info) |
+| `ArrowLeft`  | Previous image           |
+| `ArrowRight` | Next image               |
+| `Space`      | Next image               |
+| `i` / `I`    | Toggle EXIF info overlay |
+
+### EXIF Info Overlay
+
+The lightbox includes a built-in EXIF info overlay that displays image metadata when available. An info button (`ⓘ`) appears in the top-left corner when the image has EXIF data.
+
+The overlay shows:
+- Camera make/model and lens
+- Capture date and time
+- Exposure settings (focal length, aperture, shutter speed, ISO)
+- Artist and copyright
+- GPS coordinates (as a clickable map link)
 
 ### Usage
 
@@ -206,6 +241,19 @@ Lower-level button components for custom implementations.
 />
 ```
 
+### InfoButton
+
+```svelte
+<script>
+  import { InfoButton } from 'zone5/components/atoms';
+</script>
+
+<InfoButton
+  class="absolute top-4 left-4"
+  oninfo={() => { /* handle info toggle */ }}
+/>
+```
+
 ---
 
 ## TypeScript Types
@@ -228,6 +276,7 @@ interface ImageData {
     fNumber?: [number, number];
     iso?: number;
     focalLength?: [number, number];
+    focalLength35mm?: number;
     lens?: string;
 
     // Visual properties

@@ -19,6 +19,7 @@ export interface ExifItem {
 		fNumber?: Rational;
 		iso?: number;
 		focalLength?: Rational;
+		focalLength35mm?: number;
 		lens?: string;
 	};
 }
@@ -81,6 +82,7 @@ export async function exifFromFilePath(filePath: string, options: Options = {}):
 			fNumber: makeRational(exifData.FNumber, 1),
 			iso: exifData.ISO,
 			focalLength: makeRational(exifData.FocalLength, 1),
+			focalLength35mm: exifData.FocalLengthIn35mmFormat ?? exifData.FocalLengthIn35mmFilm,
 			lens: findInMap(exifData.LensModel, lens_map || {}, warn_on_unknown_lens),
 		},
 	};

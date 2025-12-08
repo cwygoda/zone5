@@ -6,11 +6,13 @@ All keyboard shortcuts for lightbox navigation.
 
 ## Lightbox Navigation
 
-| Key                | Action         |
-| ------------------ | -------------- |
-| `←` / `ArrowLeft`  | Previous image |
-| `→` / `ArrowRight` | Next image     |
-| `Escape`           | Close lightbox |
+| Key                | Action                   |
+| ------------------ | ------------------------ |
+| `←` / `ArrowLeft`  | Previous image           |
+| `→` / `ArrowRight` | Next image               |
+| `Space`            | Next image               |
+| `Escape`           | Close lightbox (or info) |
+| `i` / `I`          | Toggle EXIF info overlay |
 
 ## Navigation Behavior
 
@@ -34,6 +36,28 @@ When multiple Zone5 components are on a page, keyboard navigation moves through 
 
 <!-- Arrow keys navigate through all 10 images -->
 ```
+
+## EXIF Info Overlay
+
+Press `i` to open the EXIF info overlay, which displays image metadata:
+
+- **Camera**: Make and model
+- **Lens**: Lens model
+- **Date**: Capture date and time
+- **Settings**: Focal length, aperture, shutter speed, ISO
+- **Artist**: Photographer name
+- **Copyright**: Copyright information
+- **Location**: GPS coordinates (clickable link to map)
+
+### Availability
+
+The info button (`ⓘ`) only appears when the image has EXIF data. Press `i` to toggle the overlay, or `Escape` to close it.
+
+### Escape Key Behavior
+
+When the info overlay is open:
+- First `Escape` closes the info overlay
+- Second `Escape` closes the lightbox
 
 ## Focus Management
 
@@ -98,7 +122,9 @@ The handler checks for:
 
 - `ArrowLeft` → calls `registry.prev()`
 - `ArrowRight` → calls `registry.next()`
-- `Escape` → closes lightbox
+- `Space` → calls `registry.next()`
+- `Escape` → closes info overlay (if open) or lightbox
+- `i` / `I` → toggles EXIF info overlay (if EXIF data exists)
 
 ## Accessibility Recommendations
 

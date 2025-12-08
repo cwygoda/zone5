@@ -1,4 +1,9 @@
 # Zone5 Configuration
 
+[base]
+# Map URL template for GPS coordinates in lightbox
+# Placeholders: {lat}, {lon}
+# mapUrl = "https://earth.google.com/web/@{lat},{lon},0a,1000d,35y,0h,0t,0r"
+
 [processor]
 variants = [640, 768, 1280, 1920, 2560]

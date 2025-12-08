@@ -1,8 +1,12 @@
 <script lang="ts" module>
 	import { getContext, setContext } from 'svelte';
 
+	import type { MapUrlBuilder } from './types';
+
 	const key = 'Zone5 provider';
+	const mapUrlKey = 'Zone5 mapUrl';
 	export const useImageRegistry = () => getContext<Registry>(key);
+	export const useMapUrl = () => getContext<MapUrlBuilder | undefined>(mapUrlKey);
 </script>
 
 <script lang="ts">
@@ -16,9 +20,15 @@
 	import { type Registry, registry } from '../stores';
 	import Zone5Lightbox from './Zone5Lightbox.svelte';
 
-	let { children }: { children: Snippet } = $props();
+	interface Props {
+		children: Snippet;
+		mapUrl?: MapUrlBuilder;
+	}
+
+	let { children, mapUrl }: Props = $props();
 
 	setContext<Registry>(key, registry);
+	setContext<MapUrlBuilder | undefined>(mapUrlKey, mapUrl);
 
 	const getZ5FromUrl = () => (browser ? page.url.searchParams.get('z5') : null);
 	const setZ5InUrl = (value: string | null) => {
@@ -107,6 +117,7 @@
 <Zone5Lightbox
 	force={optimisticForce}
 	image={$registry.current ?? undefined}
+	{mapUrl}
 	onclose={() => {
 		optimisticForce = false;
 		registry.clearCurrent();

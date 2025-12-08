@@ -63,9 +63,23 @@ export function zone5(options: Zone5PluginOptions = {}): Plugin {
 		name: 'zone5',
 		enforce: 'pre',
 
+		async config() {
+			// Load config early so we can inject defines
+			if (!zone5Config) {
+				zone5Config = await load(options.cwd);
+			}
+			return {
+				define: {
+					__ZONE5_MAP_URL_CONFIG__: JSON.stringify(zone5Config.base.mapUrl ?? null),
+				},
+			};
+		},
+
 		async configResolved(cfg) {
 			viteConfig = cfg;
-			zone5Config = await load(options.cwd);
+			if (!zone5Config) {
+				zone5Config = await load(options.cwd);
+			}
 			basePath = createBasePath(zone5Config.base.namespace, options.basePath ?? viteConfig.base);
 		},
 
