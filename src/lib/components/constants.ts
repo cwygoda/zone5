@@ -9,6 +9,22 @@ export const DEFAULT_COLUMN_BREAKPOINTS = {
 } as const;
 
 /**
+ * Default target row height for justified mode in pixels.
+ */
+export const DEFAULT_TARGET_ROW_HEIGHT = 300;
+
+/**
+ * Default gap between images in justified mode in pixels.
+ */
+export const DEFAULT_GAP = 8;
+
+/**
+ * Aspect ratio threshold for panoramic images.
+ * Images with aspect ratio greater than this get their own row in justified mode.
+ */
+export const PANORAMA_THRESHOLD = 3.0;
+
+/**
  * Height for single image in wall mode (Tailwind class)
  */
 export const SINGLE_IMAGE_HEIGHT_CLASS = 'h-96';
