@@ -5,21 +5,32 @@
 	import Zone5Single from './Zone5Single.svelte';
 	import Zone5Wall from './Zone5Wall.svelte';
 	import Zone5Waterfall from './Zone5Waterfall.svelte';
-	import { DEFAULT_COLUMN_BREAKPOINTS } from './constants';
+	import Zone5Justified from './Zone5Justified.svelte';
+	import {
+		DEFAULT_COLUMN_BREAKPOINTS,
+		DEFAULT_TARGET_ROW_HEIGHT,
+		DEFAULT_GAP,
+	} from './constants';
 	import type { ImageData } from './types';
 
 	interface Props {
-		columnBreakpoints?: { [key: number]: number };
 		images: ImageData[];
-		mode?: 'wall' | 'waterfall';
+		mode?: 'wall' | 'waterfall' | 'justified';
 		nocaption?: boolean;
+		// Waterfall mode options
+		columnBreakpoints?: { [key: number]: number };
+		// Justified mode options
+		targetRowHeight?: number;
+		gap?: number;
 	}
 
 	let {
-		columnBreakpoints = DEFAULT_COLUMN_BREAKPOINTS,
 		images,
 		mode = 'wall',
 		nocaption = false,
+		columnBreakpoints = DEFAULT_COLUMN_BREAKPOINTS,
+		targetRowHeight = DEFAULT_TARGET_ROW_HEIGHT,
+		gap = DEFAULT_GAP,
 	}: Props = $props();
 
 	const imageStore = useImageRegistry();
@@ -69,6 +80,13 @@
 	<Zone5Waterfall
 		{columnBreakpoints}
 		{images}
+		onImageClick={imageStore ? handleImageClick : undefined}
+	/>
+{:else if mode === 'justified'}
+	<Zone5Justified
+		{images}
+		{targetRowHeight}
+		{gap}
 		onImageClick={imageStore ? handleImageClick : undefined}
 	/>
 {/if}

@@ -5,7 +5,12 @@ import { cleanup, render, screen } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import Zone5 from './Zone5.svelte';
-import { DEFAULT_COLUMN_BREAKPOINTS } from './constants';
+import {
+	DEFAULT_COLUMN_BREAKPOINTS,
+	DEFAULT_TARGET_ROW_HEIGHT,
+	DEFAULT_GAP,
+	PANORAMA_THRESHOLD,
+} from './constants';
 import type { ImageData } from './types';
 
 // Mock image data factory
@@ -100,6 +105,17 @@ describe('Zone5', () => {
 
 			// Waterfall mode should NOT have .zone5-wall
 			expect(container.querySelector('.zone5-wall')).toBeNull();
+		});
+
+		it('should render justified mode when specified', () => {
+			const { container } = render(Zone5, {
+				props: {
+					images: mockImages,
+					mode: 'justified',
+				},
+			});
+
+			expect(container.querySelector('.zone5-justified')).toBeTruthy();
 		});
 	});
 
@@ -223,7 +239,7 @@ describe('Zone5', () => {
 		});
 	});
 
-	describe('Waterfall mode', () => {
+	describe('Waterfall mode (column-based masonry)', () => {
 		it('should render waterfall container', () => {
 			render(Zone5, {
 				props: {
@@ -278,6 +294,69 @@ describe('Zone5', () => {
 		});
 	});
 
+	describe('Justified mode (row-based)', () => {
+		it('should render justified container', () => {
+			render(Zone5, {
+				props: {
+					images: mockImages,
+					mode: 'justified',
+				},
+			});
+
+			const justifiedContainer = screen.getByRole('list');
+			expect(justifiedContainer).toBeTruthy();
+		});
+
+		it('should render justified container with correct class', () => {
+			const { container } = render(Zone5, {
+				props: {
+					images: mockImages,
+					mode: 'justified',
+				},
+			});
+
+			const justifiedContainer = container.querySelector('.zone5-justified');
+			expect(justifiedContainer).toBeTruthy();
+		});
+
+		it('should render all images in justified mode', () => {
+			const { container } = render(Zone5, {
+				props: {
+					images: mockImages,
+					mode: 'justified',
+				},
+			});
+
+			const imageElements = container.querySelectorAll('[data-zone5-img="true"]');
+			expect(imageElements.length).toBe(mockImages.length);
+		});
+
+		it('should render images as list items', () => {
+			render(Zone5, {
+				props: {
+					images: mockImages,
+					mode: 'justified',
+				},
+			});
+
+			const listItems = screen.getAllByRole('listitem');
+			expect(listItems.length).toBe(mockImages.length);
+		});
+
+		it('should accept custom target row height and gap', () => {
+			const { container } = render(Zone5, {
+				props: {
+					images: mockImages,
+					mode: 'justified',
+					targetRowHeight: 200,
+					gap: 16,
+				},
+			});
+
+			expect(container.querySelector('.zone5-justified')).toBeTruthy();
+		});
+	});
+
 	describe('Edge cases', () => {
 		it('should handle empty images array', () => {
 			const { container } = render(Zone5, {
@@ -307,7 +386,7 @@ describe('Zone5', () => {
 			expect(imageElements.length).toBe(100);
 		});
 
-		it('should handle images with varying aspect ratios', () => {
+		it('should handle images with varying aspect ratios in waterfall mode', () => {
 			const variedImages = [
 				createMockImage('wide', 'Wide', 2.5),
 				createMockImage('tall', 'Tall', 0.5),
@@ -324,10 +403,28 @@ describe('Zone5', () => {
 			const imageElements = container.querySelectorAll('[data-zone5-img="true"]');
 			expect(imageElements.length).toBe(3);
 		});
+
+		it('should handle images with varying aspect ratios in justified mode', () => {
+			const variedImages = [
+				createMockImage('wide', 'Wide', 2.5),
+				createMockImage('tall', 'Tall', 0.5),
+				createMockImage('square', 'Square', 1.0),
+			];
+
+			const { container } = render(Zone5, {
+				props: {
+					images: variedImages,
+					mode: 'justified',
+				},
+			});
+
+			const imageElements = container.querySelectorAll('[data-zone5-img="true"]');
+			expect(imageElements.length).toBe(3);
+		});
 	});
 
-	describe('Column breakpoints', () => {
-		it('should respect default column breakpoints structure', () => {
+	describe('Constants', () => {
+		it('should have correct default column breakpoints structure', () => {
 			expect(DEFAULT_COLUMN_BREAKPOINTS).toEqual({
 				640: 2,
 				768: 3,
@@ -335,23 +432,16 @@ describe('Zone5', () => {
 			});
 		});
 
-		it('should accept custom column breakpoints with different structure', () => {
-			const customBreakpoints = {
-				0: 1,
-				800: 2,
-				1200: 3,
-				1600: 4,
-			};
+		it('should have correct default target row height', () => {
+			expect(DEFAULT_TARGET_ROW_HEIGHT).toBe(300);
+		});
 
-			const { container } = render(Zone5, {
-				props: {
-					images: mockImages,
-					mode: 'waterfall',
-					columnBreakpoints: customBreakpoints,
-				},
-			});
+		it('should have correct default gap', () => {
+			expect(DEFAULT_GAP).toBe(8);
+		});
 
-			expect(container.children.length).toBeGreaterThan(0);
+		it('should have correct panorama threshold', () => {
+			expect(PANORAMA_THRESHOLD).toBe(3.0);
 		});
 	});
 
@@ -380,6 +470,18 @@ describe('Zone5', () => {
 			expect(list).toBeTruthy();
 		});
 
+		it('should have role="list" on justified mode container', () => {
+			render(Zone5, {
+				props: {
+					images: mockImages,
+					mode: 'justified',
+				},
+			});
+
+			const list = screen.getByRole('list');
+			expect(list).toBeTruthy();
+		});
+
 		it('should have role="listitem" on each image container in wall mode', () => {
 			render(Zone5, {
 				props: {
@@ -392,7 +494,19 @@ describe('Zone5', () => {
 			expect(listItems.length).toBe(mockImages.length);
 		});
 
-		it('should mark filler elements as aria-hidden', () => {
+		it('should have role="listitem" on each image container in justified mode', () => {
+			render(Zone5, {
+				props: {
+					images: mockImages,
+					mode: 'justified',
+				},
+			});
+
+			const listItems = screen.getAllByRole('listitem');
+			expect(listItems.length).toBe(mockImages.length);
+		});
+
+		it('should mark filler elements as aria-hidden in waterfall mode', () => {
 			const imagesWithVariedHeights = [
 				createMockImage('tall', 'Tall', 0.5),
 				createMockImage('wide', 'Wide', 2.0),
