@@ -1,3 +1,11 @@
+## [1.3.2](https://github.com/cwygoda/zone5/compare/v1.3.1...v1.3.2) (2025-12-25)
+
+
+### Bug Fixes
+
+* bundle CLI dependencies for npx compatibility ([93af537](https://github.com/cwygoda/zone5/commit/93af53727846929287d9194103b444f6d0ebb7eb))
+* show actual error when npm install fails ([8b40554](https://github.com/cwygoda/zone5/commit/8b40554be61cc41906854e52d473192cdeea7302))
+
 ## [1.3.1](https://github.com/cwygoda/zone5/compare/v1.3.0...v1.3.1) (2025-11-29)
 
 
