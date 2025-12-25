@@ -1,3 +1,11 @@
+# [1.4.0](https://github.com/cwygoda/zone5/compare/v1.3.2...v1.4.0) (2025-12-25)
+
+
+### Features
+
+* add gallery config section to .zone5.toml ([c462abe](https://github.com/cwygoda/zone5/commit/c462abe8f1c3524faa80b41e2cfd93c36039610c))
+* add justified layout mode for galleries ([ccc01ae](https://github.com/cwygoda/zone5/commit/ccc01ae9bb656cd68708473f439e44713c16130a))
+
 ## [1.3.2](https://github.com/cwygoda/zone5/compare/v1.3.1...v1.3.2) (2025-12-25)
 
 
