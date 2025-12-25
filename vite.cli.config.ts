@@ -13,28 +13,23 @@ export default defineConfig({
 		emptyOutDir: true,
 		rollupOptions: {
 			external: [
-				// Node built-ins
+				// Node built-ins only - bundle all dependencies for npx compatibility
 				/^node:/,
 				'fs',
 				'path',
 				'child_process',
 				'url',
-				// Dependencies that should not be bundled
-				'commander',
-				'picocolors',
-				'ora',
-				'prompts',
-				'fs-extra',
+				'util',
+				'assert',
+				'constants',
+				'stream',
+				'readline',
+				'events',
+				'tty',
+				'os',
 			],
 			output: {
-				banner(chunk) {
-					// Only add shebang to the main entry file
-					return chunk.isEntry && chunk.facadeModuleId?.includes('cli/index.ts')
-						? '#!/usr/bin/env node'
-						: '';
-				},
-				preserveModules: true,
-				preserveModulesRoot: 'src/cli',
+				banner: '#!/usr/bin/env node',
 			},
 		},
 		target: 'node18',
