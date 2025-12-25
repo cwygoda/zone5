@@ -13,10 +13,14 @@ import { remarkZ5Images } from 'zone5/remark';
 ## Function Signature
 
 ```typescript
-const remarkZ5Images: Plugin
+const remarkZ5Images: Plugin<[RemarkZ5ImagesOptions?]>
+
+interface RemarkZ5ImagesOptions {
+  gallery?: GalleryConfig;
+}
 ```
 
-The plugin is a unified/remark plugin that requires no configuration.
+The plugin accepts an optional configuration object with gallery defaults from `.zone5.toml`.
 
 ## Basic Usage
 
@@ -39,6 +43,31 @@ const config = {
 
 export default config;
 ```
+
+### With Gallery Config
+
+Pass gallery defaults from your `.zone5.toml` configuration:
+
+```javascript
+// svelte.config.js
+import { mdsvex } from 'mdsvex';
+import { load } from 'zone5';
+import { remarkZ5Images } from 'zone5/remark';
+
+const config = await load();
+
+export default {
+  extensions: ['.svelte', '.md'],
+  preprocess: [
+    mdsvex({
+      extensions: ['.md'],
+      remarkPlugins: [[remarkZ5Images, { gallery: config.gallery }]]
+    })
+  ]
+};
+```
+
+This passes configuration options like default mode, gap, targetRowHeight, etc. to the plugin. Values can still be overridden per-page via frontmatter.
 
 ## Markdown Syntax
 
