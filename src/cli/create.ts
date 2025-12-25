@@ -241,10 +241,16 @@ async function installDependencies(
 	};
 
 	// Install all dependencies from package.json
-	execSync(getInstallCommand(), {
-		cwd: outputPath,
-		stdio: 'pipe',
-	});
+	try {
+		execSync(getInstallCommand(), {
+			cwd: outputPath,
+			stdio: 'pipe',
+		});
+	} catch (error) {
+		const execError = error as { stderr?: Buffer; message: string };
+		const stderr = execError.stderr?.toString() || '';
+		throw new Error(`Failed to install dependencies:\n${stderr || execError.message}`);
+	}
 
 	// Create svelte.config.js (basic version, will be configured later)
 	const svelteConfig = `import adapter from '@sveltejs/adapter-static';
