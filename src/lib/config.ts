@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { loadConfig } from 'zod-config';
 import { tomlAdapter } from 'zod-config/toml-adapter';
 
+import { GalleryConfigSchema } from './gallery/config.js';
 import { ProcessorConfigSchema } from './processor/config.js';
 
 const BaseConfigSchema = z.object({
@@ -19,6 +20,7 @@ export type BaseConfigType = z.infer<typeof BaseConfigSchema>;
 const ConfigSchema = z.object({
 	base: BaseConfigSchema.prefault({}),
 	processor: ProcessorConfigSchema.prefault({}),
+	gallery: GalleryConfigSchema.prefault({}),
 });
 
 export type ConfigType = z.infer<typeof ConfigSchema>;

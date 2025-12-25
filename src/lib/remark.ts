@@ -4,12 +4,22 @@ import { compile } from 'svast-stringify/dist/main.es.js';
 import type { Plugin } from 'unified';
 import { visit } from 'unist-util-visit';
 
+import type { GalleryConfig } from './gallery/config.js';
+
 type ImportMap = Record<string, string>;
 
 interface ImageData {
 	key: string;
 	alt: string;
 	title?: string;
+}
+
+/**
+ * Options for the remarkZ5Images plugin
+ */
+export interface RemarkZ5ImagesOptions {
+	/** Gallery configuration from .zone5.toml */
+	gallery?: GalleryConfig;
 }
 
 /**
@@ -46,9 +56,72 @@ function buildImagesExpression(imageData: ImageData[]): string {
 }
 
 /**
+ * Resolved gallery options combining config defaults with frontmatter overrides
+ */
+interface ResolvedGalleryOptions {
+	mode?: string;
+	columnBreakpoints?: Record<number, number>;
+	targetRowHeight?: number;
+	gap?: number;
+	panoramaThreshold?: number;
+}
+
+/**
+ * Create a string property node
+ */
+function createStringProperty(name: string, value: string): Property {
+	return {
+		type: 'svelteProperty',
+		name,
+		shorthand: 'none',
+		value: [{ type: 'text', value }],
+		modifiers: [],
+	};
+}
+
+/**
+ * Create a numeric property node (as expression)
+ */
+function createNumberProperty(name: string, value: number): Property {
+	return {
+		type: 'svelteProperty',
+		name,
+		shorthand: 'none',
+		value: [
+			{
+				type: 'svelteDynamicContent',
+				expression: { type: 'svelteExpression', value: String(value) },
+			},
+		],
+		modifiers: [],
+	};
+}
+
+/**
+ * Create an object property node (as expression)
+ */
+function createObjectProperty(name: string, value: Record<string, unknown>): Property {
+	return {
+		type: 'svelteProperty',
+		name,
+		shorthand: 'none',
+		value: [
+			{
+				type: 'svelteDynamicContent',
+				expression: { type: 'svelteExpression', value: JSON.stringify(value) },
+			},
+		],
+		modifiers: [],
+	};
+}
+
+/**
  * Create a Zone5 Svelte component node
  */
-function createZone5Component(imageData: ImageData[], mode?: string): SvelteComponent {
+function createZone5Component(
+	imageData: ImageData[],
+	options: ResolvedGalleryOptions,
+): SvelteComponent {
 	const properties: (Property | Directive)[] = [
 		{
 			type: 'svelteProperty',
@@ -67,19 +140,20 @@ function createZone5Component(imageData: ImageData[], mode?: string): SvelteComp
 		},
 	];
 
-	if (mode) {
-		properties.push({
-			type: 'svelteProperty',
-			name: 'mode',
-			shorthand: 'none',
-			value: [
-				{
-					type: 'text',
-					value: mode,
-				},
-			],
-			modifiers: [],
-		});
+	if (options.mode) {
+		properties.push(createStringProperty('mode', options.mode));
+	}
+
+	if (options.columnBreakpoints) {
+		properties.push(createObjectProperty('columnBreakpoints', options.columnBreakpoints));
+	}
+
+	if (options.targetRowHeight !== undefined) {
+		properties.push(createNumberProperty('targetRowHeight', options.targetRowHeight));
+	}
+
+	if (options.gap !== undefined) {
+		properties.push(createNumberProperty('gap', options.gap));
 	}
 
 	return {
@@ -215,15 +289,29 @@ function createScriptElement(importMap: ImportMap): { type: 'raw'; value: string
 
 /**
  * Remark plugin to process Zone5 images
+ *
+ * @param options - Plugin options including gallery config from .zone5.toml
  */
-export const remarkZ5Images: Plugin = () => {
+export const remarkZ5Images: Plugin<[RemarkZ5ImagesOptions?]> = (options = {}) => {
+	const galleryConfig = (options.gallery ?? {}) as GalleryConfig;
+
 	return (tree, file): void => {
 		const rootTree = tree as Root;
 		const importMap: ImportMap = {};
 		const existingKeys = new Set<string>();
 
+		// Get frontmatter values (these override config)
 		const fm = file.data.fm as Record<string, unknown> | undefined;
-		const zone5mode = fm?.zone5mode as string | undefined;
+		const frontmatterMode = fm?.zone5mode as string | undefined;
+
+		// Merge config with frontmatter (frontmatter takes precedence)
+		const resolvedOptions: ResolvedGalleryOptions = {
+			mode: frontmatterMode ?? galleryConfig.mode,
+			columnBreakpoints: galleryConfig.columnBreakpoints,
+			targetRowHeight: galleryConfig.targetRowHeight,
+			gap: galleryConfig.gap,
+			panoramaThreshold: galleryConfig.panoramaThreshold,
+		};
 
 		// First, collect all Z5 images for the import map
 		visit(rootTree, 'image', (node) => {
@@ -244,7 +332,7 @@ export const remarkZ5Images: Plugin = () => {
 					const paragraph = child as Paragraph;
 					const z5Images = paragraph.children.filter((ch) => isZ5Image(ch)) as Image[];
 					const imageData = collectImageData(z5Images, existingKeys);
-					const svelteComponent = createZone5Component(imageData, zone5mode);
+					const svelteComponent = createZone5Component(imageData, resolvedOptions);
 
 					// Replace the multi-image paragraph with the svelte component
 					node.children.splice(i, 1, svelteComponent as unknown as RootContent);
@@ -264,7 +352,7 @@ export const remarkZ5Images: Plugin = () => {
 					.filter((img): img is Image => img !== null);
 
 				const imageData = collectImageData(imageNodes, existingKeys);
-				const svelteComponent = createZone5Component(imageData, zone5mode);
+				const svelteComponent = createZone5Component(imageData, resolvedOptions);
 
 				// Calculate how many nodes to remove (including newlines)
 				const startIndex = group[0];
@@ -292,7 +380,7 @@ export const remarkZ5Images: Plugin = () => {
 				if (isZ5ImageParagraph(child) && child.type === 'paragraph') {
 					const imageNode = child.children[0] as Image;
 					const imageData = collectImageData([imageNode], existingKeys);
-					const svelteComponent = createZone5Component(imageData, zone5mode);
+					const svelteComponent = createZone5Component(imageData, resolvedOptions);
 
 					// Replace the single image paragraph with the svelte component
 					node.children.splice(i, 1, svelteComponent as unknown as RootContent);
