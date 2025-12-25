@@ -45,17 +45,20 @@ Main gallery component that displays images and registers them with the lightbox
 
 ### Props
 
-| Prop                | Type                          | Default                       | Description                                             |
-| ------------------- | ----------------------------- | ----------------------------- | ------------------------------------------------------- |
-| `images`            | `ImageData[]`                 | (required)                    | Array of image data objects                             |
-| `mode`              | `'wall' \| 'waterfall'`       | `'wall'`                      | Gallery layout mode                                     |
-| `columnBreakpoints` | `{ [width: number]: number }` | `{ 640: 2, 768: 3, 1024: 4 }` | Viewport width to column count mapping (waterfall mode) |
-| `nocaption`         | `boolean`                     | `false`                       | Hide image captions                                     |
+| Prop                | Type                                      | Default                       | Description                                              |
+| ------------------- | ----------------------------------------- | ----------------------------- | -------------------------------------------------------- |
+| `images`            | `ImageData[]`                             | (required)                    | Array of image data objects                              |
+| `mode`              | `'wall' \| 'waterfall' \| 'justified'`    | `'wall'`                      | Gallery layout mode                                      |
+| `columnBreakpoints` | `{ [width: number]: number }`             | `{ 640: 2, 768: 3, 1024: 4 }` | Viewport width to column count mapping (waterfall mode)  |
+| `targetRowHeight`   | `number`                                  | `300`                         | Target row height in pixels (justified mode)             |
+| `gap`               | `number`                                  | `8`                           | Gap between images in pixels (justified mode)            |
+| `nocaption`         | `boolean`                                 | `false`                       | Hide image captions                                      |
 
 ### Layout Modes
 
-- **`wall`** - Fixed-height row layout. Single images display centered; multiple images in a horizontal row.
-- **`waterfall`** - Masonry-style layout with configurable columns per breakpoint.
+- **`wall`** - Fixed-height row layout. Single images display centered; multiple images in a horizontal row with cropping.
+- **`waterfall`** - Column-based masonry layout. Images are distributed across columns and maintain their aspect ratios.
+- **`justified`** - Row-based layout (like Flickr/Google Photos). Each row fills full width while preserving aspect ratios. Panoramic images (aspect ratio > 3) automatically get their own row.
 
 Note: When using mdsvex with the Zone5 plugin, the mode can be set in the markdown YAML frontmatter, using the `zone5mode` key.
 
@@ -83,6 +86,17 @@ Note: When using mdsvex with the Zone5 plugin, the mode can be set in the markdo
   {images}
   mode="waterfall"
   columnBreakpoints={{ 640: 2, 1024: 3, 1280: 4 }}
+/>
+```
+
+### Justified Mode Example
+
+```svelte
+<Zone5
+  {images}
+  mode="justified"
+  targetRowHeight={250}
+  gap={12}
 />
 ```
 

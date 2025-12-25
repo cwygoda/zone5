@@ -128,11 +128,11 @@ Only the first image becomes a Zone5 component.
 
 ### Gallery Mode
 
-Set the gallery mode via frontmatter:
+Set the gallery mode via frontmatter using the `zone5mode` key:
 
 ```markdown
 ---
-zone5mode: waterfall
+zone5mode: justified
 ---
 
 ![Photo 1](./photo1.jpg?z5)
@@ -142,8 +142,16 @@ zone5mode: waterfall
 Generates:
 
 ```svelte
-<Zone5 images={[...]} mode="waterfall" />
+<Zone5 images={[...]} mode="justified" />
 ```
+
+#### Available Modes
+
+| Mode        | Description                                                                |
+| ----------- | -------------------------------------------------------------------------- |
+| `wall`      | Fixed-height row layout with image cropping (default)                      |
+| `waterfall` | Column-based masonry layout                                                |
+| `justified` | Row-based layout (like Flickr/Google Photos) with full-width rows          |
 
 ## Generated Output
 
