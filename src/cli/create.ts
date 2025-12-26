@@ -348,7 +348,15 @@ async function generateGalleryPage(
 		return `![${filename.replace(/\.[^.]+$/, '')}](./${filename}?z5)`;
 	});
 
-	const markdown = `# Photo Gallery
+	const markdown = `---
+# Zone5 Gallery Configuration
+# https://cwygoda.github.io/zone5/docs/reference/remark-plugin-api#frontmatter-options
+
+# Gallery layout mode: "justified" (default) | "wall" | "waterfall"
+# zone5mode: justified
+---
+
+# Photo Gallery
 
 ${imageLinks.join('\n')}
 `;
