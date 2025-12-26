@@ -178,9 +178,9 @@ Generates:
 
 | Mode        | Description                                                                |
 | ----------- | -------------------------------------------------------------------------- |
-| `wall`      | Fixed-height row layout with image cropping (default)                      |
+| `justified` | Row-based layout (like Flickr/Google Photos) with full-width rows (default)|
+| `wall`      | Fixed-height row layout with image cropping                                |
 | `waterfall` | Column-based masonry layout                                                |
-| `justified` | Row-based layout (like Flickr/Google Photos) with full-width rows          |
 
 ## Generated Output
 

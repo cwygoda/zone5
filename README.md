@@ -94,7 +94,23 @@ widths = [400, 800, 1200, 1600, 2400]
 
 Zone5 supports three layout modes:
 
-#### Wall Mode (Default)
+#### Justified Mode (Default)
+
+Row-based layout (like Flickr/Google Photos). Each row fills the full width while preserving aspect ratios. Panoramic images (aspect ratio > 3) automatically get their own row.
+
+```svelte
+<Zone5 images={images} mode="justified" />
+
+<!-- With custom row height and gap -->
+<Zone5
+  images={images}
+  mode="justified"
+  targetRowHeight={250}
+  gap={12}
+/>
+```
+
+#### Wall Mode
 
 Fixed-height grid layout. Images are cropped to fill their containers.
 
@@ -114,22 +130,6 @@ Column-based masonry layout. Images are distributed across columns and maintain 
   images={images}
   mode="waterfall"
   columnBreakpoints={{ 640: 2, 1024: 4 }}
-/>
-```
-
-#### Justified Mode
-
-Row-based layout (like Flickr/Google Photos). Each row fills the full width while preserving aspect ratios. Panoramic images (aspect ratio > 3) automatically get their own row.
-
-```svelte
-<Zone5 images={images} mode="justified" />
-
-<!-- With custom row height and gap -->
-<Zone5
-  images={images}
-  mode="justified"
-  targetRowHeight={250}
-  gap={12}
 />
 ```
 

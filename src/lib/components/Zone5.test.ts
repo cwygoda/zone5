@@ -84,15 +84,15 @@ describe('Zone5', () => {
 			expect(container.children.length).toBeGreaterThan(0);
 		});
 
-		it('should render wall mode by default', () => {
+		it('should render justified mode by default', () => {
 			const { container } = render(Zone5, {
 				props: {
 					images: mockImages,
 				},
 			});
 
-			// With 3 images, wall mode should render the .zone5-wall container
-			expect(container.querySelector('.zone5-wall')).toBeTruthy();
+			// With 3 images, justified mode should render the .zone5-justified container
+			expect(container.querySelector('.zone5-justified')).toBeTruthy();
 		});
 
 		it('should render waterfall mode when specified', () => {

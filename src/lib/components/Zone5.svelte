@@ -26,7 +26,7 @@
 
 	let {
 		images,
-		mode = 'wall',
+		mode = 'justified',
 		nocaption = false,
 		columnBreakpoints = DEFAULT_COLUMN_BREAKPOINTS,
 		targetRowHeight = DEFAULT_TARGET_ROW_HEIGHT,
