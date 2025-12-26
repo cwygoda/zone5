@@ -1,6 +1,6 @@
 ---
 title: Color
-zone5mode: waterfall
+zone5mode: justified
 ---
 
 ![crete](./images/crete.jpg?z5 "White mountains, Crete")
