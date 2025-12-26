@@ -1,3 +1,11 @@
+# [1.5.0](https://github.com/cwygoda/zone5/compare/v1.4.0...v1.5.0) (2025-12-26)
+
+
+### Features
+
+* **cli:** add frontmatter with docs link to generated markdown ([3370149](https://github.com/cwygoda/zone5/commit/33701490901bd68035a7af1fe60215ae26fd1c9e))
+* make justified the default gallery layout mode ([8686a67](https://github.com/cwygoda/zone5/commit/8686a673e7128d8150e7164823061070675fac5b))
+
 # [1.4.0](https://github.com/cwygoda/zone5/compare/v1.3.2...v1.4.0) (2025-12-25)
 
 
