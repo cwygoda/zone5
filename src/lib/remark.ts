@@ -180,6 +180,33 @@ function collectImageData(images: Image[], existingKeys: Set<string>): ImageData
 }
 
 /**
+ * Validate and sanitize an image URL for safe use in import statements.
+ * Prevents import path injection by ensuring URLs are valid relative paths.
+ */
+function validateImageUrl(url: string): boolean {
+	// Remove the ?z5 suffix for validation
+	const cleanUrl = url.replace(/\?z5$/, '');
+
+	// Block URLs with protocol schemes (http:, https:, file:, data:, javascript:, etc.)
+	if (cleanUrl.match(/^[a-zA-Z][a-zA-Z0-9+.-]*:/)) {
+		return false;
+	}
+
+	// Block URLs with null bytes or other control characters (ASCII 0-31 and 127)
+	// eslint-disable-next-line no-control-regex
+	if (/[\x00-\x1f\x7f]/.test(cleanUrl)) {
+		return false;
+	}
+
+	// Block URLs that could escape the import statement (quotes, backticks, newlines)
+	if (cleanUrl.match(/['"`\n\r]/)) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
  * Generate a unique import key for an image URL
  */
 function generateImportKey(url: string, existingKeys: Set<string>): string {
@@ -205,10 +232,20 @@ function generateImportKey(url: string, existingKeys: Set<string>): string {
 }
 
 /**
- * Check if a node is a Zone5 image (ends with ?z5)
+ * Check if a node is a Zone5 image (ends with ?z5) with a valid URL
  */
 function isZ5Image(node: RootContent): node is Image {
-	return node.type === 'image' && typeof node.url === 'string' && node.url.endsWith('?z5');
+	if (node.type !== 'image' || typeof node.url !== 'string' || !node.url.endsWith('?z5')) {
+		return false;
+	}
+
+	// Security: Validate URL to prevent import path injection
+	if (!validateImageUrl(node.url)) {
+		console.warn(`Zone5: Skipping image with invalid URL: ${node.url}`);
+		return false;
+	}
+
+	return true;
 }
 
 /**

@@ -144,6 +144,16 @@ Zone5 also extracts other EXIF metadata including:
 
 This information is used for display purposes and cannot currently be stripped. If you need to remove all EXIF data from your images, consider pre-processing them with a tool like ExifTool before using Zone5.
 
+## Security Considerations
+
+### EXIF Metadata Handling
+
+Zone5 extracts EXIF metadata from images including camera information, date/time, artist, and copyright fields. This data is rendered in the gallery UI (e.g., image titles in the lightbox).
+
+**For end users:** The built-in Zone5 components use Svelte's automatic HTML escaping, which prevents XSS attacks from malicious EXIF data. You can safely use Zone5 with images from untrusted sources.
+
+**For developers extending Zone5:** If you create custom components that render EXIF data, always use Svelte's standard `{value}` interpolation rather than `{@html value}`. The `{@html}` directive bypasses escaping and could allow XSS if used with untrusted EXIF content.
+
 ## Related
 
 - [Customize Image Variants](../../how-to/customize-image-variants/) - How to optimize variant configuration

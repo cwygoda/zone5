@@ -4,7 +4,7 @@ import type { NextHandleFunction } from 'connect';
 import mime from 'mime';
 import { createReadStream } from 'node:fs';
 import { cp, readFile, stat } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import type { Plugin, ResolvedConfig } from 'vite';
 
 import { type ConfigType, load } from './config.js';
@@ -29,7 +29,18 @@ const serve =
 			const [, id] = req.url.split(basePath);
 			try {
 				const path = decodeURIComponent(id);
-				const src = join(cacheDir, path);
+				const src = resolve(cacheDir, path);
+
+				// Security: Prevent path traversal attacks by ensuring the resolved path
+				// is within the cache directory
+				const normalizedCacheDir = resolve(cacheDir);
+				if (!src.startsWith(normalizedCacheDir + '/') && src !== normalizedCacheDir) {
+					console.error(`Zone5: Blocked path traversal attempt: ${path}`);
+					res.statusCode = 403;
+					res.end('Forbidden');
+					return;
+				}
+
 				try {
 					const image = createReadStream(src);
 					const stats = await stat(src);
