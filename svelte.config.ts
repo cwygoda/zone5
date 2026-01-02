@@ -1,6 +1,7 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { mdsvex } from 'mdsvex';
+import rehypeSlug from 'rehype-slug';
 
 import { remarkZ5Images } from './src/lib/remark.ts';
 import { remarkExtractTitle } from './src/remark-extract-title.ts';
@@ -11,6 +12,7 @@ const config = {
 		mdsvex({
 			extensions: ['.md'],
 			remarkPlugins: [remarkExtractTitle, remarkZ5Images],
+			rehypePlugins: [rehypeSlug],
 		}),
 	],
 	extensions: ['.svelte', '.md'],
