@@ -1,3 +1,10 @@
+## [1.6.9](https://github.com/cwygoda/zone5/compare/v1.6.8...v1.6.9) (2026-01-02)
+
+
+### Performance Improvements
+
+* **components:** optimize waterfall column filler calculation ([e3f1deb](https://github.com/cwygoda/zone5/commit/e3f1deb7ed8b44c3a57804bf9cdb870c3ae6fcb2))
+
 ## [1.6.8](https://github.com/cwygoda/zone5/compare/v1.6.7...v1.6.8) (2026-01-02)
 
 
