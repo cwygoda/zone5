@@ -1,3 +1,10 @@
+## [1.6.8](https://github.com/cwygoda/zone5/compare/v1.6.7...v1.6.8) (2026-01-02)
+
+
+### Performance Improvements
+
+* **config:** use iterative directory walk instead of recursion ([651d844](https://github.com/cwygoda/zone5/commit/651d84417fd707fc4eb697c29163229e4d73aae7))
+
 ## [1.6.7](https://github.com/cwygoda/zone5/compare/v1.6.6...v1.6.7) (2026-01-02)
 
 
