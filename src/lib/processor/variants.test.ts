@@ -4,7 +4,7 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { configHash, type ProcessorConfig } from './config';
+import { configHash, ProcessorConfigSchema, type ProcessorConfigInput } from './config';
 import { sourceFileHash } from './file';
 import { generateImageVariants } from './variants';
 
@@ -12,11 +12,12 @@ const createCacheDir = (
 	cache: string,
 	root: string,
 	sourceFile: string,
-	processor: ProcessorConfig,
+	processor: ProcessorConfigInput,
 ) => {
+	const parsedProcessor = ProcessorConfigSchema.parse(processor);
 	const fileBasename = sourceFile.split('/').pop()!.replace(/\.[^.]+$/, '');
 	const sourceHash = sourceFileHash(root, sourceFile);
-	const procConfigHash = configHash(processor);
+	const procConfigHash = configHash(parsedProcessor);
 	return join(cache, `${procConfigHash}-${fileBasename}-${sourceHash}`);
 };
 
