@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/cwygoda/zone5/compare/v1.6.2...v1.6.3) (2026-01-02)
+
+
+### Bug Fixes
+
+* **docs:** add rehype-slug for heading anchor links ([48fc089](https://github.com/cwygoda/zone5/commit/48fc089064a34141db5b632a8a7cf927135fd0cf))
+
 ## [1.6.2](https://github.com/cwygoda/zone5/compare/v1.6.1...v1.6.2) (2026-01-02)
 
 
