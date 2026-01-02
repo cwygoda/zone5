@@ -1,3 +1,10 @@
+## [1.6.4](https://github.com/cwygoda/zone5/compare/v1.6.3...v1.6.4) (2026-01-02)
+
+
+### Performance Improvements
+
+* **processor:** parallelize image variant generation ([9e3bfec](https://github.com/cwygoda/zone5/commit/9e3bfec82edc411332c61d17f0027822dfc08927))
+
 ## [1.6.3](https://github.com/cwygoda/zone5/compare/v1.6.2...v1.6.3) (2026-01-02)
 
 
