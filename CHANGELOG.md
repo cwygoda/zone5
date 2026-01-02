@@ -1,3 +1,10 @@
+## [1.6.5](https://github.com/cwygoda/zone5/compare/v1.6.4...v1.6.5) (2026-01-02)
+
+
+### Performance Improvements
+
+* **processor:** share image metadata between variants and main processor ([4fcd751](https://github.com/cwygoda/zone5/commit/4fcd7517f0d2075b84cf3f884392be875722af3b))
+
 ## [1.6.4](https://github.com/cwygoda/zone5/compare/v1.6.3...v1.6.4) (2026-01-02)
 
 
