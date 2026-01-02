@@ -13,6 +13,12 @@ export interface GeneratedVariant {
 	path: string;
 }
 
+export interface VariantsResult {
+	variants: GeneratedVariant[];
+	sourceWidth: number;
+	sourceHeight: number;
+}
+
 const addDebugText = async (img: sharp.Sharp, width: number, height: number) => {
 	const svg = `<svg height="100" width="300">
 	  <text x="0" y="50" font-size="50" fill="#fff">${width}×${height}</text>
@@ -26,7 +32,7 @@ export async function generateImageVariants(options: {
 	cacheDir: string;
 	clear?: boolean;
 	forceOverwrite?: boolean;
-}): Promise<GeneratedVariant[]> {
+}): Promise<VariantsResult> {
 	return tracer.startActiveSpan('zone5.generateImageVariants', async (span) => {
 		try {
 			const { processor: processorInput, sourceFile, cacheDir, clear = false, forceOverwrite = false } = options;
@@ -35,9 +41,9 @@ export async function generateImageVariants(options: {
 			// Parse file path components
 			const { name: fileBasename, ext: fileExtension } = parse(sourceFile);
 
-			// Get source image metadata to check dimensions
+			// Get source image metadata to check dimensions (returned to caller to avoid redundant reads)
 			const sourceImage = sharp(sourceFile);
-			const { width: sourceWidth } = await sourceImage.metadata();
+			const { width: sourceWidth, height: sourceHeight } = await sourceImage.metadata();
 
 			// Filter out widths that would be wider than the source image
 			const validWidths = processor.variants.filter((width) => width <= sourceWidth);
@@ -102,7 +108,7 @@ export async function generateImageVariants(options: {
 			});
 
 			span.setStatus({ code: SpanStatusCode.OK });
-			return variants;
+			return { variants, sourceWidth, sourceHeight };
 		} catch (error) {
 			span.setStatus({
 				code: SpanStatusCode.ERROR,
