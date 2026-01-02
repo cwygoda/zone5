@@ -57,40 +57,44 @@ export async function generateImageVariants(options: {
 			}
 			await ensureDirectoryExists(cacheDir);
 
-			// Generate variants for each valid width
-			const variants: GeneratedVariant[] = [];
-			let generatedCount = 0;
-			for (const width of validWidths) {
-				const variantFilename = `${fileBasename}-${width}${fileExtension}`;
-				const variantPath = join(cacheDir, variantFilename);
+			// Generate variants for each valid width in parallel
+			const variantResults = await Promise.all(
+				validWidths.map(async (width) => {
+					const variantFilename = `${fileBasename}-${width}${fileExtension}`;
+					const variantPath = join(cacheDir, variantFilename);
 
-				// Check if variant already exists and should be overwritten
-				const variantExists = await fileExists(variantPath);
-				if (!variantExists || forceOverwrite) {
-					let img = sharp(sourceFile);
-					if (processor.resize_gamma) {
-						img = img.gamma(processor.resize_gamma);
+					// Check if variant already exists and should be overwritten
+					const variantExists = await fileExists(variantPath);
+					let wasGenerated = false;
+					if (!variantExists || forceOverwrite) {
+						let img = sharp(sourceFile);
+						if (processor.resize_gamma) {
+							img = img.gamma(processor.resize_gamma);
+						}
+						img = img.resize(width, null, {
+							fit: 'inside',
+							kernel: processor.resize_kernel,
+						});
+
+						if (process.env.ZONE5_DEBUG) {
+							const { width: w, height: h } = await img.metadata();
+							const scale = w / width;
+							img = await addDebugText(img, width, Math.ceil(h * scale));
+						}
+
+						await img.toFile(variantPath);
+						wasGenerated = true;
 					}
-					img = img.resize(width, null, {
-						fit: 'inside',
-						kernel: processor.resize_kernel,
-					});
 
-					if (process.env.ZONE5_DEBUG) {
-						const { width: w, height: h } = await img.metadata();
-						const scale = w / width;
-						img = await addDebugText(img, width, Math.ceil(h * scale));
-					}
+					return {
+						variant: { width, path: variantPath },
+						wasGenerated,
+					};
+				}),
+			);
 
-					await img.toFile(variantPath);
-					generatedCount++;
-				}
-
-				variants.push({
-					width,
-					path: variantPath,
-				});
-			}
+			const variants = variantResults.map((r) => r.variant);
+			const generatedCount = variantResults.filter((r) => r.wasGenerated).length;
 
 			span.setAttributes({
 				'zone5.variantsGenerated': generatedCount,
