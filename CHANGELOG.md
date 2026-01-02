@@ -1,3 +1,10 @@
+## [1.6.7](https://github.com/cwygoda/zone5/compare/v1.6.6...v1.6.7) (2026-01-02)
+
+
+### Performance Improvements
+
+* **processor:** return ItemFeature directly to avoid redundant file read ([7ebf596](https://github.com/cwygoda/zone5/commit/7ebf596feac9b932aad8321f627ba1f26a5bdfa9))
+
 ## [1.6.6](https://github.com/cwygoda/zone5/compare/v1.6.5...v1.6.6) (2026-01-02)
 
 
