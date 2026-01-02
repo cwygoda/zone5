@@ -13,11 +13,8 @@ export const sourceFileHash = (sourceBaseDir: string, sourceFile: string) => {
 };
 
 export const ensureDirectoryExists = async (dirPath: string): Promise<void> => {
-	try {
-		await access(dirPath);
-	} catch {
-		await mkdir(dirPath, { recursive: true });
-	}
+	// mkdir with recursive: true is idempotent - no need to check if dir exists first
+	await mkdir(dirPath, { recursive: true });
 };
 
 export const fileExists = async (filePath: string): Promise<boolean> => {
