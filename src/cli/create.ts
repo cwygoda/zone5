@@ -326,16 +326,24 @@ async function handleImages(
 	targetDir: string,
 	mode: 'copy' | 'link' | 'move',
 ): Promise<void> {
-	for (const { path: imagePath, relativePath } of images) {
-		const targetPath = join(targetDir, basename(relativePath));
+	// Process images in parallel batches to avoid overwhelming the filesystem
+	const BATCH_SIZE = 10;
 
-		if (mode === 'copy') {
-			await copyFile(imagePath, targetPath);
-		} else if (mode === 'link') {
-			await symlink(imagePath, targetPath);
-		} else if (mode === 'move') {
-			await rename(imagePath, targetPath);
-		}
+	for (let i = 0; i < images.length; i += BATCH_SIZE) {
+		const batch = images.slice(i, i + BATCH_SIZE);
+		await Promise.all(
+			batch.map(async ({ path: imagePath, relativePath }) => {
+				const targetPath = join(targetDir, basename(relativePath));
+
+				if (mode === 'copy') {
+					await copyFile(imagePath, targetPath);
+				} else if (mode === 'link') {
+					await symlink(imagePath, targetPath);
+				} else if (mode === 'move') {
+					await rename(imagePath, targetPath);
+				}
+			}),
+		);
 	}
 }
 
