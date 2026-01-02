@@ -166,11 +166,11 @@ function createZone5Component(
 }
 
 /**
- * Collect image data from Z5 images
+ * Collect image data from Z5 images using pre-computed URL-to-key mapping
  */
-function collectImageData(images: Image[], existingKeys: Set<string>): ImageData[] {
+function collectImageData(images: Image[], urlToKeyMap: Map<string, string>): ImageData[] {
 	return images.map((imageNode) => {
-		const importKey = generateImportKey(imageNode.url, existingKeys);
+		const importKey = urlToKeyMap.get(imageNode.url) || imageNode.url;
 		return {
 			key: importKey,
 			alt: imageNode.alt || '',
@@ -336,6 +336,8 @@ export const remarkZ5Images: Plugin<[RemarkZ5ImagesOptions?]> = (options = {}) =
 		const rootTree = tree as Root;
 		const importMap: ImportMap = {};
 		const existingKeys = new Set<string>();
+		// Cache URL-to-key mappings to avoid regenerating keys in second pass
+		const urlToKeyMap = new Map<string, string>();
 
 		// Get frontmatter values (these override config)
 		const fm = file.data.fm as Record<string, unknown> | undefined;
@@ -350,17 +352,16 @@ export const remarkZ5Images: Plugin<[RemarkZ5ImagesOptions?]> = (options = {}) =
 			panoramaThreshold: galleryConfig.panoramaThreshold,
 		};
 
-		// First, collect all Z5 images for the import map
+		// First pass: collect all Z5 images and build URL-to-key mapping
 		visit(rootTree, 'image', (node) => {
-			if (isZ5Image(node)) {
+			if (isZ5Image(node) && !urlToKeyMap.has(node.url)) {
 				const importKey = generateImportKey(node.url, existingKeys);
 				importMap[importKey] = node.url;
+				urlToKeyMap.set(node.url, importKey);
 			}
 		});
 
-		// Reset keys for consistent grouping
-		existingKeys.clear();
-
+		// Second pass: transform AST using cached URL-to-key mapping
 		visit(rootTree, 'root', (node) => {
 			// First, handle multi-image paragraphs (images on consecutive lines without blank lines)
 			for (let i = node.children.length - 1; i >= 0; i--) {
@@ -368,7 +369,7 @@ export const remarkZ5Images: Plugin<[RemarkZ5ImagesOptions?]> = (options = {}) =
 				if (isMultiZ5ImageParagraph(child) && child.type === 'paragraph') {
 					const paragraph = child as Paragraph;
 					const z5Images = paragraph.children.filter((ch) => isZ5Image(ch)) as Image[];
-					const imageData = collectImageData(z5Images, existingKeys);
+					const imageData = collectImageData(z5Images, urlToKeyMap);
 					const svelteComponent = createZone5Component(imageData, resolvedOptions);
 
 					// Replace the multi-image paragraph with the svelte component
@@ -388,7 +389,7 @@ export const remarkZ5Images: Plugin<[RemarkZ5ImagesOptions?]> = (options = {}) =
 					.map((index) => getImageFromParagraph(node.children[index]))
 					.filter((img): img is Image => img !== null);
 
-				const imageData = collectImageData(imageNodes, existingKeys);
+				const imageData = collectImageData(imageNodes, urlToKeyMap);
 				const svelteComponent = createZone5Component(imageData, resolvedOptions);
 
 				// Calculate how many nodes to remove (including newlines)
@@ -416,7 +417,7 @@ export const remarkZ5Images: Plugin<[RemarkZ5ImagesOptions?]> = (options = {}) =
 				const child = node.children[i];
 				if (isZ5ImageParagraph(child) && child.type === 'paragraph') {
 					const imageNode = child.children[0] as Image;
-					const imageData = collectImageData([imageNode], existingKeys);
+					const imageData = collectImageData([imageNode], urlToKeyMap);
 					const svelteComponent = createZone5Component(imageData, resolvedOptions);
 
 					// Replace the single image paragraph with the svelte component
