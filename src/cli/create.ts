@@ -17,11 +17,12 @@ export interface CreateProjectOptions {
 	outputFolder: string;
 	mode: 'copy' | 'link' | 'move';
 	packageManager: 'npm' | 'pnpm' | 'yarn' | 'bun' | 'skip';
+	batchSize: number;
 	interactive: boolean;
 }
 
 export async function createProject(options: CreateProjectOptions): Promise<void> {
-	const { inputFolder, outputFolder, mode, packageManager, interactive } = options;
+	const { inputFolder, outputFolder, mode, packageManager, batchSize, interactive } = options;
 
 	// Resolve paths
 	const inputPath = resolve(inputFolder);
@@ -98,7 +99,7 @@ export async function createProject(options: CreateProjectOptions): Promise<void
 	);
 	const routesDir = join(outputPath, 'src', 'routes');
 	await fse.ensureDir(routesDir);
-	await handleImages(images, inputPath, routesDir, mode);
+	await handleImages(images, inputPath, routesDir, mode, batchSize);
 	spinner.succeed(
 		`${mode === 'copy' ? 'Copied' : mode === 'link' ? 'Linked' : 'Moved'} ${images.length} images`,
 	);
@@ -325,12 +326,11 @@ async function handleImages(
 	inputPath: string,
 	targetDir: string,
 	mode: 'copy' | 'link' | 'move',
+	batchSize: number,
 ): Promise<void> {
 	// Process images in parallel batches to avoid overwhelming the filesystem
-	const BATCH_SIZE = 10;
-
-	for (let i = 0; i < images.length; i += BATCH_SIZE) {
-		const batch = images.slice(i, i + BATCH_SIZE);
+	for (let i = 0; i < images.length; i += batchSize) {
+		const batch = images.slice(i, i + batchSize);
 		await Promise.all(
 			batch.map(async ({ path: imagePath, relativePath }) => {
 				const targetPath = join(targetDir, basename(relativePath));

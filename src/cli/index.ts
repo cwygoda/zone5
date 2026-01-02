@@ -29,9 +29,10 @@ program
 		'Package manager to use: npm, pnpm, yarn, bun, or skip to not install',
 		'npm',
 	)
+	.option('-b, --batch-size <number>', 'Number of images to process in parallel', '10')
 	.option('--no-interactive', 'Skip prompts and use defaults')
 	.action(async (inputFolder: string, outputFolder: string, options) => {
-		const { mode, packageManager, interactive } = options;
+		const { mode, packageManager, batchSize, interactive } = options;
 
 		if (!['copy', 'link', 'move'].includes(mode)) {
 			console.error(pc.red(`Error: Invalid mode "${mode}". Must be one of: copy, link, move`));
@@ -47,12 +48,19 @@ program
 			process.exit(1);
 		}
 
+		const parsedBatchSize = parseInt(batchSize, 10);
+		if (isNaN(parsedBatchSize) || parsedBatchSize < 1) {
+			console.error(pc.red(`Error: Invalid batch size "${batchSize}". Must be a positive integer`));
+			process.exit(1);
+		}
+
 		try {
 			await createProject({
 				inputFolder,
 				outputFolder,
 				mode: mode as 'copy' | 'link' | 'move',
 				packageManager: packageManager as 'npm' | 'pnpm' | 'yarn' | 'bun' | 'skip',
+				batchSize: parsedBatchSize,
 				interactive,
 			});
 		} catch (error) {
