@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/cwygoda/zone5/compare/v1.5.0...v1.6.0) (2026-01-02)
+
+
+### Features
+
+* **processor:** add strip_gps option for privacy protection ([7bfb78d](https://github.com/cwygoda/zone5/commit/7bfb78d941e4b7a803fe33b13452b3f6fd30c0b0))
+
 # [1.5.0](https://github.com/cwygoda/zone5/compare/v1.4.0...v1.5.0) (2025-12-26)
 
 
