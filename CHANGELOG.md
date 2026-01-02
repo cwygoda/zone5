@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/cwygoda/zone5/compare/v1.6.1...v1.6.2) (2026-01-02)
+
+
+### Performance Improvements
+
+* **processor:** remove redundant access() check in ensureDirectoryExists ([39c47e0](https://github.com/cwygoda/zone5/commit/39c47e0fc6b330cd60d8e9e0797c175de9e4fd6c))
+
 ## [1.6.1](https://github.com/cwygoda/zone5/compare/v1.6.0...v1.6.1) (2026-01-02)
 
 
