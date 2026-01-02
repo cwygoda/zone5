@@ -36,8 +36,10 @@
 
 	let optimisticForce = $state(getZ5FromUrl() !== null);
 
-	let isUpdatingFromUrl = false;
-	let isUpdatingUrl = false;
+	// Single state machine for bidirectional URL-registry sync
+	// Prevents race conditions by using one source of truth instead of two boolean flags
+	type SyncState = 'idle' | 'url-to-registry' | 'registry-to-url';
+	let syncState: SyncState = 'idle';
 	let initialSyncComplete = false;
 
 	beforeNavigate((navigation) => {
@@ -50,7 +52,8 @@
 		const current = $registry.current;
 		const images = $registry.images;
 
-		if (isUpdatingFromUrl) return;
+		// Skip if URL is currently updating the registry
+		if (syncState === 'url-to-registry') return;
 
 		const currentZ5 = untrack(() => getZ5FromUrl());
 		const newZ5 = current?.id ?? null;
@@ -65,10 +68,10 @@
 				}
 			}
 
-			isUpdatingUrl = true;
+			syncState = 'registry-to-url';
 			setZ5InUrl(newZ5);
 			queueMicrotask(() => {
-				isUpdatingUrl = false;
+				syncState = 'idle';
 			});
 		}
 	});
@@ -78,25 +81,26 @@
 		const z5 = getZ5FromUrl();
 		const images = $registry.images;
 
-		if (isUpdatingUrl || images.length === 0) return;
+		// Skip if registry is currently updating URL, or no images yet
+		if (syncState === 'registry-to-url' || images.length === 0) return;
 
 		if (z5) {
-			isUpdatingFromUrl = true;
+			syncState = 'url-to-registry';
 			const found = registry.findCurrent(z5);
 			if (found) {
 				optimisticForce = false;
 			}
 			initialSyncComplete = true;
 			queueMicrotask(() => {
-				isUpdatingFromUrl = false;
+				syncState = 'idle';
 			});
 		} else {
 			const currentId = untrack(() => $registry.current?.id);
 			if (currentId) {
-				isUpdatingFromUrl = true;
+				syncState = 'url-to-registry';
 				registry.clearCurrent();
 				queueMicrotask(() => {
-					isUpdatingFromUrl = false;
+					syncState = 'idle';
 				});
 			}
 			initialSyncComplete = true;
