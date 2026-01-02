@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/cwygoda/zone5/compare/v1.6.0...v1.6.1) (2026-01-02)
+
+
+### Bug Fixes
+
+* **security:** add path traversal and import injection protections ([dd591ae](https://github.com/cwygoda/zone5/commit/dd591ae681df5efaefd4c52f0d32684949faa981))
+
 # [1.6.0](https://github.com/cwygoda/zone5/compare/v1.5.0...v1.6.0) (2026-01-02)
 
 
