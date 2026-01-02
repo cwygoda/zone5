@@ -3,7 +3,7 @@ import { dataToEsm } from '@rollup/pluginutils';
 import type { NextHandleFunction } from 'connect';
 import mime from 'mime';
 import { createReadStream } from 'node:fs';
-import { cp, readFile, stat } from 'node:fs/promises';
+import { cp, stat } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import type { Plugin, ResolvedConfig } from 'vite';
 
@@ -114,18 +114,19 @@ export function zone5(options: Zone5PluginOptions = {}): Plugin {
 								'zone5.pathname': srcURL.pathname,
 							});
 
-							const featureFile = await processor({
+							const { feature } = await processor({
 								...zone5Config,
 								sourceFile: srcURL.pathname,
 							});
 
-							const item: ItemFeature = JSON.parse(
-								await readFile(featureFile, { encoding: 'utf-8' }),
-							);
-
-							item.assets.forEach((asset) => {
-								asset.href = join(basePath, asset.href);
-							});
+							// Use the feature returned by processor directly (avoids redundant file read)
+							const item: ItemFeature = {
+								...feature,
+								assets: feature.assets.map((asset) => ({
+									...asset,
+									href: join(basePath, asset.href),
+								})),
+							};
 
 							span.setStatus({ code: SpanStatusCode.OK });
 							return dataToEsm(item, {
