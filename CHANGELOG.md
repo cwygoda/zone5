@@ -1,3 +1,10 @@
+## [1.6.6](https://github.com/cwygoda/zone5/compare/v1.6.5...v1.6.6) (2026-01-02)
+
+
+### Performance Improvements
+
+* **remark:** cache URL-to-key mapping to avoid duplicate key generation ([cd40448](https://github.com/cwygoda/zone5/commit/cd404488166b0518e5e5e8e24b85edd7a1a36406))
+
 ## [1.6.5](https://github.com/cwygoda/zone5/compare/v1.6.4...v1.6.5) (2026-01-02)
 
 
