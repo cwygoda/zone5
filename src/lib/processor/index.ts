@@ -1,5 +1,5 @@
 import { SpanStatusCode, trace } from '@opentelemetry/api';
-import { writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import { join, parse, relative } from 'path';
 
 import type { BaseConfigType } from '../config.js';
@@ -26,13 +26,18 @@ export interface ItemFeature {
 	assets: { href: string; width: number }[];
 }
 
+export interface ProcessorResult {
+	featureFile: string;
+	feature: ItemFeature;
+}
+
 const processor = async (options: {
 	base: BaseConfigType;
 	processor: ProcessorConfigInput;
 	sourceFile: string;
 	clear?: boolean;
 	forceOverwrite?: boolean;
-}) => {
+}): Promise<ProcessorResult> => {
 	return tracer.startActiveSpan('zone5.processor', async (span) => {
 		try {
 			const { base, processor: processorInput, sourceFile, clear = false, forceOverwrite = false } = options;
@@ -56,6 +61,8 @@ const processor = async (options: {
 				'zone5.forceOverwrite': forceOverwrite,
 			});
 
+			let feature: ItemFeature;
+
 			if (!(await fileExists(featureFile)) || clear || forceOverwrite) {
 				// Note: generateImageVariants returns source dimensions to avoid redundant metadata reads
 				const [exifFeature, blurhash, averageColor, variantsResult] = await Promise.all([
@@ -68,7 +75,7 @@ const processor = async (options: {
 				// Strip GPS data if configured (for privacy)
 				const geometry = processorConfig.strip_gps ? null : exifFeature.geometry;
 
-				const feature: ItemFeature = {
+				feature = {
 					type: 'Feature',
 					geometry,
 					id: sourceHash,
@@ -87,11 +94,13 @@ const processor = async (options: {
 
 				span.setAttribute('zone5.variantsCount', variantsResult.variants.length);
 			} else {
+				// Read cached feature - this is the only case where we need to read from disk
+				feature = JSON.parse(await readFile(featureFile, { encoding: 'utf-8' })) as ItemFeature;
 				span.setAttribute('zone5.cached', true);
 			}
 
 			span.setStatus({ code: SpanStatusCode.OK });
-			return featureFile;
+			return { featureFile, feature };
 		} catch (error) {
 			span.setStatus({
 				code: SpanStatusCode.ERROR,

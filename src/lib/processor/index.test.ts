@@ -1,4 +1,4 @@
-import { readFile, rm } from 'fs/promises';
+import { rm } from 'fs/promises';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { fileExists } from './file.js';
@@ -41,13 +41,9 @@ describe('zone5 processor', () => {
 			sourceFile: testImage,
 		};
 
-		const featureFilePath = await processor(options);
+		const { featureFile, feature } = await processor(options);
 
-		expect(await fileExists(featureFilePath)).toBe(true);
-
-		const featureContent = await readFile(featureFilePath, 'utf-8');
-		const feature = JSON.parse(featureContent);
-
+		expect(await fileExists(featureFile)).toBe(true);
 		expect(feature.type).toBe('Feature');
 		expect(feature.geometry).toBeDefined();
 		expect(feature.properties).toBeDefined();
@@ -71,10 +67,11 @@ describe('zone5 processor', () => {
 			sourceFile: testImage,
 		};
 
-		const featureFilePath1 = await processor(options);
-		const featureFilePath2 = await processor(options);
+		const result1 = await processor(options);
+		const result2 = await processor(options);
 
-		expect(featureFilePath1).toBe(featureFilePath2);
+		expect(result1.featureFile).toBe(result2.featureFile);
+		expect(result1.feature).toEqual(result2.feature);
 	});
 
 	it('should respect clear option', async () => {
@@ -93,8 +90,8 @@ describe('zone5 processor', () => {
 			clear: true,
 		};
 
-		const featureFilePath = await processor(options);
-		expect(await fileExists(featureFilePath)).toBe(true);
+		const { featureFile } = await processor(options);
+		expect(await fileExists(featureFile)).toBe(true);
 	});
 
 	it('should include GPS data by default', async () => {
@@ -111,14 +108,12 @@ describe('zone5 processor', () => {
 			sourceFile: testImageWithGps,
 		};
 
-		const featureFilePath = await processor(options);
-		const featureContent = await readFile(featureFilePath, 'utf-8');
-		const feature = JSON.parse(featureContent);
+		const { feature } = await processor(options);
 
 		// The iPhone test image has GPS data
 		expect(feature.geometry).not.toBeNull();
-		expect(feature.geometry.type).toBe('Point');
-		expect(feature.geometry.coordinates).toBeDefined();
+		expect(feature.geometry!.type).toBe('Point');
+		expect(feature.geometry!.coordinates).toBeDefined();
 	});
 
 	it('should strip GPS data when strip_gps is true', async () => {
@@ -136,9 +131,7 @@ describe('zone5 processor', () => {
 			sourceFile: testImageWithGps,
 		};
 
-		const featureFilePath = await processor(options);
-		const featureContent = await readFile(featureFilePath, 'utf-8');
-		const feature = JSON.parse(featureContent);
+		const { feature } = await processor(options);
 
 		// GPS data should be stripped
 		expect(feature.geometry).toBeNull();
