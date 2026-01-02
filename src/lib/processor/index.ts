@@ -1,7 +1,6 @@
 import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { writeFile } from 'fs/promises';
 import { join, parse, relative } from 'path';
-import sharp from 'sharp';
 
 import type { BaseConfigType } from '../config.js';
 import { generateBlurhash } from './blurhash.js';
@@ -58,12 +57,12 @@ const processor = async (options: {
 			});
 
 			if (!(await fileExists(featureFile)) || clear || forceOverwrite) {
-				const [exifFeature, blurhash, averageColor, variants, metadata] = await Promise.all([
+				// Note: generateImageVariants returns source dimensions to avoid redundant metadata reads
+				const [exifFeature, blurhash, averageColor, variantsResult] = await Promise.all([
 					exifFromFilePath(sourceFile),
 					generateBlurhash(sourceFile),
 					getDominantColors(sourceFile),
 					generateImageVariants({ sourceFile, processor: processorConfig, cacheDir, clear, forceOverwrite }),
-					sharp(sourceFile).metadata(),
 				]);
 
 				// Strip GPS data if configured (for privacy)
@@ -75,18 +74,18 @@ const processor = async (options: {
 					id: sourceHash,
 					properties: {
 						...exifFeature.properties,
-						aspectRatio: metadata.width / metadata.height,
+						aspectRatio: variantsResult.sourceWidth / variantsResult.sourceHeight,
 						blurhash,
 						averageColor,
 					},
-					assets: variants.map((variant) => ({
+					assets: variantsResult.variants.map((variant) => ({
 						href: relative(base.cache, variant.path),
 						width: variant.width,
 					})),
 				};
 				await writeFile(featureFile, JSON.stringify(feature));
 
-				span.setAttribute('zone5.variantsCount', variants.length);
+				span.setAttribute('zone5.variantsCount', variantsResult.variants.length);
 			} else {
 				span.setAttribute('zone5.cached', true);
 			}

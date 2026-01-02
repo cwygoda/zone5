@@ -61,15 +61,17 @@ describe('generateImageVariants', () => {
 			cacheDir,
 		};
 
-		const variants = await generateImageVariants(options);
+		const result = await generateImageVariants(options);
 
-		expect(variants).toHaveLength(3);
-		expect(variants[0].width).toBe(100);
-		expect(variants[1].width).toBe(200);
-		expect(variants[2].width).toBe(400);
+		expect(result.variants).toHaveLength(3);
+		expect(result.variants[0].width).toBe(100);
+		expect(result.variants[1].width).toBe(200);
+		expect(result.variants[2].width).toBe(400);
+		expect(result.sourceWidth).toBeGreaterThan(0);
+		expect(result.sourceHeight).toBeGreaterThan(0);
 
 		// Check that all files exist
-		for (const variant of variants) {
+		for (const variant of result.variants) {
 			await expect(access(variant.path)).resolves.not.toThrow();
 			expect(variant.path).toMatch(/[a-f0-9]{8}-canon-m6-22mm-[a-f0-9]{16}\/canon-m6-22mm-\d+\.jpg$/);
 		}
@@ -111,14 +113,14 @@ describe('generateImageVariants', () => {
 
 		// Generate variants first time
 		const firstRun = await generateImageVariants(options);
-		const { mtime: firstMtime } = await stat(firstRun[0].path);
+		const { mtime: firstMtime } = await stat(firstRun.variants[0].path);
 
 		// Wait a bit to ensure different timestamps
 		await new Promise((resolve) => setTimeout(resolve, 10));
 
 		// Generate variants second time
 		await generateImageVariants(options);
-		const { mtime: secondMtime } = await stat(firstRun[0].path);
+		const { mtime: secondMtime } = await stat(firstRun.variants[0].path);
 
 		expect(firstMtime).toEqual(secondMtime);
 	});
@@ -138,14 +140,14 @@ describe('generateImageVariants', () => {
 
 		// Generate variants first time
 		const firstRun = await generateImageVariants(options);
-		const { mtime: firstMtime } = await stat(firstRun[0].path);
+		const { mtime: firstMtime } = await stat(firstRun.variants[0].path);
 
 		// Wait a bit to ensure different timestamps
 		await new Promise((resolve) => setTimeout(resolve, 10));
 
 		// Generate variants second time with forceOverwrite
 		await generateImageVariants({ ...options, forceOverwrite: true });
-		const { mtime: secondMtime } = await stat(firstRun[0].path);
+		const { mtime: secondMtime } = await stat(firstRun.variants[0].path);
 
 		expect(secondMtime.getTime()).toBeGreaterThan(firstMtime.getTime());
 	});
@@ -220,12 +222,12 @@ describe('generateImageVariants', () => {
 			};
 
 			// Should not throw an error when using different kernels
-			const variants = await generateImageVariants(options);
-			expect(variants).toHaveLength(1);
-			expect(variants[0].width).toBe(150);
+			const result = await generateImageVariants(options);
+			expect(result.variants).toHaveLength(1);
+			expect(result.variants[0].width).toBe(150);
 
 			// Verify the file was created
-			await expect(access(variants[0].path)).resolves.not.toThrow();
+			await expect(access(result.variants[0].path)).resolves.not.toThrow();
 		},
 	);
 });
