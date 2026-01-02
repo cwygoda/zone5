@@ -29,6 +29,7 @@ Controls how images are processed.
 | `variants`      | number[] | `[640, 768, 1280, 1920, 2560]` | Array of widths (in pixels) to generate for each image.                                                                  |
 | `resize_kernel` | string   | `"mks2021"`                    | Sharp resize kernel. Options: `"nearest"`, `"cubic"`, `"mitchell"`, `"lanczos2"`, `"lanczos3"`, `"mks2013"`, `"mks2021"` |
 | `resize_gamma`  | number   | (none)                         | Optional gamma correction for resizing. Range: 1.0 - 3.0. When not set, no gamma correction is applied.                  |
+| `strip_gps`     | boolean  | `false`                        | Strip GPS/location data from EXIF metadata. See [Privacy Considerations](#privacy-considerations).                       |
 
 ### [gallery] Section
 
@@ -108,6 +109,40 @@ const config = await load();
 // or specify directory
 const config = await load('/path/to/project');
 ```
+
+## Privacy Considerations
+
+### GPS/Location Data Exposure
+
+**Important:** By default, Zone5 extracts and exposes GPS coordinates from image EXIF metadata. This data is included in the generated feature files and may be accessible in your published gallery.
+
+Photos taken with smartphones and GPS-enabled cameras often contain precise location data that reveals where the photo was taken. If you are publishing photos of:
+
+- Your home or private property
+- Photos of children or family members
+- Locations you wish to keep private
+
+You should enable the `strip_gps` option to prevent location data from being included:
+
+```toml
+[processor]
+strip_gps = true
+```
+
+When `strip_gps` is enabled:
+- GPS coordinates are not included in the generated feature files
+- The `geometry` field in the GeoJSON output will be `null`
+- Other EXIF data (camera, lens, exposure settings, date) is still preserved
+
+### Other EXIF Metadata
+
+Zone5 also extracts other EXIF metadata including:
+- Camera make and model
+- Lens information
+- Date and time the photo was taken
+- Artist and copyright information
+
+This information is used for display purposes and cannot currently be stripped. If you need to remove all EXIF data from your images, consider pre-processing them with a tool like ExifTool before using Zone5.
 
 ## Related
 

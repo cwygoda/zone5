@@ -6,6 +6,7 @@ import processor from './index.js';
 
 describe('zone5 processor', () => {
 	const testImage = 'src/lib/processor/test-data/canon-m6-22mm.jpg';
+	const testImageWithGps = 'src/lib/processor/test-data/iphone-15pro.jpg';
 	const testCacheDir = 'test-cache';
 	const testSourceBaseDir = 'src/lib/processor/test-data';
 
@@ -94,5 +95,54 @@ describe('zone5 processor', () => {
 
 		const featureFilePath = await processor(options);
 		expect(await fileExists(featureFilePath)).toBe(true);
+	});
+
+	it('should include GPS data by default', async () => {
+		const options = {
+			base: {
+				root: testSourceBaseDir,
+				cache: testCacheDir,
+				namespace: '@zone5',
+			},
+			processor: {
+				resize_kernel: 'linear',
+				variants: [400],
+			},
+			sourceFile: testImageWithGps,
+		};
+
+		const featureFilePath = await processor(options);
+		const featureContent = await readFile(featureFilePath, 'utf-8');
+		const feature = JSON.parse(featureContent);
+
+		// The iPhone test image has GPS data
+		expect(feature.geometry).not.toBeNull();
+		expect(feature.geometry.type).toBe('Point');
+		expect(feature.geometry.coordinates).toBeDefined();
+	});
+
+	it('should strip GPS data when strip_gps is true', async () => {
+		const options = {
+			base: {
+				root: testSourceBaseDir,
+				cache: testCacheDir,
+				namespace: '@zone5',
+			},
+			processor: {
+				resize_kernel: 'linear',
+				variants: [400],
+				strip_gps: true,
+			},
+			sourceFile: testImageWithGps,
+		};
+
+		const featureFilePath = await processor(options);
+		const featureContent = await readFile(featureFilePath, 'utf-8');
+		const feature = JSON.parse(featureContent);
+
+		// GPS data should be stripped
+		expect(feature.geometry).toBeNull();
+		// Other EXIF properties should still be present
+		expect(feature.properties.make).toBeDefined();
 	});
 });

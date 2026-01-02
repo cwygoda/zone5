@@ -6,7 +6,7 @@ import sharp from 'sharp';
 import type { BaseConfigType } from '../config.js';
 import { generateBlurhash } from './blurhash.js';
 import { type DominantColor, getDominantColors } from './color.js';
-import { configHash, type ProcessorConfig } from './config.js';
+import { configHash, ProcessorConfigSchema, type ProcessorConfigInput } from './config.js';
 import type { ExifItem } from './exif/exif.js';
 import exifFromFilePath from './exif/index.js';
 import type { GeojsonPoint } from './exif/types.js';
@@ -29,14 +29,16 @@ export interface ItemFeature {
 
 const processor = async (options: {
 	base: BaseConfigType;
-	processor: ProcessorConfig;
+	processor: ProcessorConfigInput;
 	sourceFile: string;
 	clear?: boolean;
 	forceOverwrite?: boolean;
 }) => {
 	return tracer.startActiveSpan('zone5.processor', async (span) => {
 		try {
-			const { base, processor: processorConfig, sourceFile, clear = false, forceOverwrite = false } = options;
+			const { base, processor: processorInput, sourceFile, clear = false, forceOverwrite = false } = options;
+			// Parse config to apply defaults
+			const processorConfig = ProcessorConfigSchema.parse(processorInput);
 
 			const { name: fileBasename } = parse(sourceFile);
 			const sourceHash = sourceFileHash(base.root, sourceFile);
@@ -64,9 +66,12 @@ const processor = async (options: {
 					sharp(sourceFile).metadata(),
 				]);
 
+				// Strip GPS data if configured (for privacy)
+				const geometry = processorConfig.strip_gps ? null : exifFeature.geometry;
+
 				const feature: ItemFeature = {
 					type: 'Feature',
-					geometry: exifFeature.geometry,
+					geometry,
 					id: sourceHash,
 					properties: {
 						...exifFeature.properties,
