@@ -47,10 +47,17 @@
 	 * Calculate filler heights to equalize column heights in waterfall mode
 	 */
 	let colFillers = $derived.by(() => {
-		const totalHeights = colPhotos.map((col) =>
-			col.reduce((sum, img) => sum + 1 / img.image.properties.aspectRatio, 0),
-		);
-		const maxHeight = Math.max(...totalHeights);
+		// Calculate heights and find max in a single pass to avoid array spread overhead
+		const totalHeights: number[] = [];
+		let maxHeight = 0;
+
+		for (const col of colPhotos) {
+			const height = col.reduce((sum, img) => sum + 1 / img.image.properties.aspectRatio, 0);
+			totalHeights.push(height);
+			if (height > maxHeight) {
+				maxHeight = height;
+			}
+		}
 
 		return totalHeights.map((height) => maxHeight - height);
 	});
