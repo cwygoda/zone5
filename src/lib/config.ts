@@ -1,5 +1,5 @@
 import { access } from 'node:fs/promises';
-import { join, parse, relative, resolve } from 'node:path';
+import { dirname, join, parse, relative, resolve } from 'node:path';
 import { cwd } from 'node:process';
 import { stringify } from 'smol-toml';
 import { z } from 'zod';
@@ -25,18 +25,29 @@ const ConfigSchema = z.object({
 
 export type ConfigType = z.infer<typeof ConfigSchema>;
 
+/**
+ * Walk up directory tree looking for a file.
+ * Uses iterative approach instead of recursion for better performance.
+ */
 export const walkUntilFound = async (path: string): Promise<string | undefined> => {
-	try {
-		await access(path);
-		return path;
-	} catch {
-		const parsed = parse(path);
-		if (parsed.dir != '/') {
-			const next = join(parsed.dir, '..', parsed.base);
-			return await walkUntilFound(next);
+	let currentPath = path;
+
+	while (true) {
+		try {
+			await access(currentPath);
+			return currentPath;
+		} catch {
+			const parentDir = dirname(dirname(currentPath));
+			const filename = parse(currentPath).base;
+
+			// Reached filesystem root
+			if (parentDir === dirname(currentPath)) {
+				return undefined;
+			}
+
+			currentPath = join(parentDir, filename);
 		}
 	}
-	return undefined;
 };
 
 export const load = async (configDir: string | undefined = undefined) => {
