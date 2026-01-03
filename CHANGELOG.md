@@ -1,3 +1,15 @@
+# [1.7.0](https://github.com/cwygoda/zone5/compare/v1.6.9...v1.7.0) (2026-01-03)
+
+
+### Features
+
+* **cli:** make batch size configurable via --batch-size option ([cda9527](https://github.com/cwygoda/zone5/commit/cda9527ca9b828f93b539ee3e58c727e2e587be4))
+
+
+### Performance Improvements
+
+* **cli:** parallelize image handling with batched operations ([e70aa6a](https://github.com/cwygoda/zone5/commit/e70aa6aa8fc29832548b5b8e12f2f077e6a17233))
+
 ## [1.6.9](https://github.com/cwygoda/zone5/compare/v1.6.8...v1.6.9) (2026-01-02)
 
 
