@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/cwygoda/zone5/compare/v1.7.0...v1.7.1) (2026-01-03)
+
+
+### Performance Improvements
+
+* **provider:** use single state machine for URL-registry sync ([557de85](https://github.com/cwygoda/zone5/commit/557de859a63d3a4ff3e4099bac7a361df545664b))
+
 # [1.7.0](https://github.com/cwygoda/zone5/compare/v1.6.9...v1.7.0) (2026-01-03)
 
 
