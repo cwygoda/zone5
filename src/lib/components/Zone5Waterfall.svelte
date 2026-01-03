@@ -2,6 +2,7 @@
 	import Img from './Zone5Img.svelte';
 	import { DEFAULT_COLUMN_BREAKPOINTS } from './constants';
 	import type { ImageData } from './types';
+	import { calculateColumnCount, calculateWaterfallLayout } from '../layouts/waterfall.js';
 
 	interface Props {
 		columnBreakpoints?: { [key: number]: number };
@@ -13,68 +14,34 @@
 
 	let containerWidth = $state(0);
 
-	/**
-	 * Calculate number of columns based on container width and breakpoints
-	 */
-	let nColumns = $derived.by(() => {
-		let columns = 1;
-		const sortedBreakpoints = Object.entries(columnBreakpoints).sort(
-			([a], [b]) => Number(a) - Number(b),
-		);
+	// Calculate number of columns based on container width
+	let nColumns = $derived(calculateColumnCount(containerWidth, columnBreakpoints));
 
-		for (const [breakpoint, cols] of sortedBreakpoints) {
-			if (containerWidth >= Number(breakpoint)) {
-				columns = cols;
-			}
-		}
+	// Convert ImageData to layout input format
+	let layoutItems = $derived(
+		images.map((image, index) => ({
+			aspectRatio: image.properties.aspectRatio,
+			index,
+		})),
+	);
 
-		return columns;
-	});
-
-	/**
-	 * Distribute images across columns in round-robin fashion
-	 */
-	let colPhotos = $derived.by(() => {
-		const cols: { image: ImageData; idx: number }[][] = Array.from({ length: nColumns }, () => []);
-		images.forEach((image, idx) => {
-			cols[idx % nColumns].push({ image, idx });
-		});
-
-		return cols;
-	});
-
-	/**
-	 * Calculate filler heights to equalize column heights in waterfall mode
-	 */
-	let colFillers = $derived.by(() => {
-		// Calculate heights and find max in a single pass to avoid array spread overhead
-		const totalHeights: number[] = [];
-		let maxHeight = 0;
-
-		for (const col of colPhotos) {
-			const height = col.reduce((sum, img) => sum + 1 / img.image.properties.aspectRatio, 0);
-			totalHeights.push(height);
-			if (height > maxHeight) {
-				maxHeight = height;
-			}
-		}
-
-		return totalHeights.map((height) => maxHeight - height);
-	});
+	// Calculate layout using pure function
+	let columns = $derived(calculateWaterfallLayout(layoutItems, nColumns));
 </script>
 
 <div class="flex gap-2" bind:clientWidth={containerWidth} role="list">
-	{#each Array.from({ length: nColumns }, (_, i) => i) as columnId (columnId)}
+	{#each columns as column, columnId (columnId)}
 		<div class="flex flex-col gap-2" role="listitem">
-			{#each colPhotos[columnId] as { image, idx } (idx)}
+			{#each column.items as item (item.index)}
+				{@const image = images[item.index]}
 				<div>
-					<Img {image} onclick={onImageClick ? () => onImageClick(idx) : undefined} />
+					<Img {image} onclick={onImageClick ? () => onImageClick(item.index) : undefined} />
 				</div>
 			{/each}
-			{#if colFillers[columnId] > 0}
+			{#if column.fillerHeight > 0}
 				<div
 					class="bg-slate-200 rounded"
-					style:height={colFillers[columnId] * 100 + '%'}
+					style:height={column.fillerHeight * 100 + '%'}
 					aria-hidden="true"
 				></div>
 			{/if}
